@@ -9,34 +9,44 @@ import (
 	"strconv"
 )
 
-type advent3file struct {
-	ropesAmt, requiredLength int
-	ropesLength              []int
-}
-
 func main() {
 	fileName := "advent_3.test"
+
 	log.Printf("Reading file %q ...\n", fileName)
-	input := readFile(fileName)
+	inputFile := readAdvent3File(fileName)
 	log.Printf("File %q contains %d ropes, %d total, and %d lengths\n",
-		fileName, input.ropesAmt, input.requiredLength, len(input.ropesLength))
-	log.Printf("Sorting %d ints...\n", len(input.ropesLength))
+		fileName, inputFile.ropesAmt, inputFile.requiredLength, len(inputFile.ropesLength))
+	log.Printf("Processing...\n")
+
+	calcResult := calcAdvent3(inputFile)
+	log.Printf("Answer is %d (sum=%d at index=%d)", calcResult.index, calcResult.sum, calcResult.index)
+}
+
+type advent3Result struct {
+	sum, index int
+}
+
+func calcAdvent3(input advent3file) advent3Result {
 	sort.Sort(sort.Reverse(sort.IntSlice(input.ropesLength)))
 
 	sum, idx := 0, 0
 	for ; sum < input.requiredLength; idx++ {
 		sum += input.ropesLength[idx]
 	}
-	log.Printf("sum=%d at index=%d", sum, idx)
+	return advent3Result{sum, idx - 1}
 }
 
-func readFile(fileName string) advent3file {
+type advent3file struct {
+	ropesAmt, requiredLength int
+	ropesLength              []int
+}
+
+func readAdvent3File(fileName string) advent3file {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer func() {
-
 		if err2 := file.Close(); err2 != nil {
 			fmt.Println(err2)
 		}
@@ -62,6 +72,7 @@ func readFile(fileName string) advent3file {
 		default:
 			res.ropesLength = append(res.ropesLength, number)
 		}
+		idx++
 	}
 	return res
 }
