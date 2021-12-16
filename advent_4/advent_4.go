@@ -23,29 +23,65 @@ type advent4Result struct {
 func calcAdvent4Result(input advent4File) advent4Result {
 	result := advent4Result{0}
 
-	found := make([][]int, 0)
+	foundHashes := make(map[int]bool, input.lengthsAmt)
+	found := make([][]int, 0, input.lengthsAmt)
 
+	stats := func() string {
+		return fmt.Sprintf("Stats: hashes %d, found: %d", len(foundHashes), len(found))
+	}
+	hash := func(a []int) int {
+		res := 0
+		for _, aa := range a[:4] {
+			res += aa
+		}
+		return res
+	}
 	alreadyFound := func(a []int) bool {
-		for _, f := range found {
-			if reflect.DeepEqual(a, f) {
-				return true
+		// quick check in hash-array
+		ah := hash(a)
+		if foundHashes[ah] {
+			for _, f := range found {
+				if reflect.DeepEqual(a, f) {
+					return true
+				}
 			}
 		}
 		return false
+
 	}
 
-	for index := 0; index < input.lengthsAmt; index++ {
-		permutation := make([]int, 0, input.lengthsAmt)
+	double := make([]int, 0, 2*input.lengthsAmt)
+	double = append(double, input.lengths...)
+	double = append(double, input.lengths...)
 
-		permutation = append(permutation, input.lengths[index:]...)
-		permutation = append(permutation, input.lengths[:index]...)
-
-		if !alreadyFound(permutation) {
-			result.amount++
-			found = append(found, permutation)
+	// meaning max length of possible cycle
+	maxPossibleAmount := 0
+	// meaning starts of possible cycles
+	firstNumberEntries := 0
+	for _, l := range input.lengths {
+		if input.lengths[0] == l {
+			firstNumberEntries++
 		}
 	}
+	maxPossibleAmount = input.lengthsAmt / firstNumberEntries
 
+	for index := 0; index < input.lengthsAmt; index++ {
+		permutation := double[index : index+input.lengthsAmt]
+
+		if !alreadyFound(permutation) {
+			foundHashes[hash(permutation)] = true
+			found = append(found, permutation)
+		}
+
+		if index%1000 == 0 {
+			log.Printf("[Index=%d] %s\n", index, stats())
+		}
+
+		if len(found) == maxPossibleAmount {
+			break
+		}
+	}
+	result.amount = len(found)
 	return result
 }
 
