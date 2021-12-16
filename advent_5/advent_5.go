@@ -11,15 +11,67 @@ import (
 )
 
 func main() {
-
+	filename := "advent_5.test.txt"
+	inputFile := readAdvent5File(filename)
+	result := calcAdvent5Result(inputFile)
+	log.Printf("Result (%dth code): %s (and 5th code: %s)\n",
+		inputFile.codeNumber, result.requiredCode, result.fifthCode)
 }
 
 type advent5Result struct {
-	code string
+	fifthCode    string
+	requiredCode string
+}
+
+type indexesCalculator struct {
+	values    []int
+	maxValues []int // exclusive
+}
+
+func (ic *indexesCalculator) inc() {
+	depth := len(ic.values)
+
+	for level := depth - 1; level >= 0; level-- {
+		currLevelValue := ic.values[level]
+		newLevelValue := currLevelValue + 1
+		if newLevelValue >= ic.maxValues[level] {
+			ic.values[level] = 0 // should increase upper level
+		} else {
+			ic.values[level] = newLevelValue
+			break
+		}
+	}
+}
+func (ic *indexesCalculator) currentNumber(linesOfNumbers [][]rune) string {
+	result := make([]rune, 0)
+	for idx, v := range ic.values {
+		r := linesOfNumbers[idx][v]
+		result = append(result, r)
+	}
+	return string(result)
 }
 
 func calcAdvent5Result(inputFile advent5File) advent5Result {
-	return advent5Result{}
+	requiredIndex := inputFile.codeNumber - 1
+	const required5thIndex = 4
+	result := advent5Result{}
+
+	cipherSize := inputFile.cipherSize
+	calculator := indexesCalculator{make([]int, cipherSize /*init with 0-s*/), make([]int, 0, cipherSize)}
+	for _, line := range inputFile.linesOfNumbers {
+		calculator.maxValues = append(calculator.maxValues, len(line))
+	}
+	for currentIndex := 0; currentIndex <= requiredIndex; currentIndex++ {
+		if currentIndex == required5thIndex {
+			result.fifthCode = calculator.currentNumber(inputFile.linesOfNumbers)
+		}
+		if currentIndex == requiredIndex {
+			result.requiredCode = calculator.currentNumber(inputFile.linesOfNumbers)
+		}
+		calculator.inc()
+	}
+
+	return result
 }
 
 type advent5File struct {

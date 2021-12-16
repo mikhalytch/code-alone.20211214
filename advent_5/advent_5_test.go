@@ -40,3 +40,12 @@ func TestReadAdvent5File(t *testing.T) {
 		})
 	}
 }
+
+func TestCalcAdvent5Result(t *testing.T) {
+	filename := "advent_5.sample"
+	want := advent5Result{"12945", "12945"}
+	got := calcAdvent5Result(readAdvent5File(filename))
+	if got != want {
+		t.Errorf("Got %q, want %q", got, want)
+	}
+}
