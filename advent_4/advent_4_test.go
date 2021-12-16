@@ -25,6 +25,15 @@ func TestReadAdvent4File(t *testing.T) {
 	})
 }
 
+func TestCalcAdvent4Result(t *testing.T) {
+	filename := "advent_4.sample"
+	want := 2
+	input := readAdvent4File(filename)
+	got := calcAdvent4Result(input)
+
+	assertNumbers(t, got.amount, want)
+}
+
 func assertNumbers(t *testing.T, got int, want int) {
 	if got != want {
 		t.Errorf("Got %v lenghts, want %v", got, want)
