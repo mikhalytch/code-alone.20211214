@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"reflect"
@@ -40,6 +41,15 @@ func TestCalcAdvent6Result(t *testing.T) {
 	got := result.print()
 
 	assertStrings(t, got, want)
+}
+
+func TestGetAggregatedDirections(t *testing.T) {
+	t.Run("real life value printed as expected", func(t *testing.T) {
+		value := directionsAggregator(-21 + 9i)
+		want := bytes.Runes([]byte("DDDDDDDDDRRRRRRRRRRRRRRRRRRRRR"))
+		got := value.getAggregatedDirections()
+		assertRuneArray(t, want, got)
+	})
 }
 
 func assertStrings(t *testing.T, got string, want string) {

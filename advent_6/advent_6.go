@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"sort"
 	"strings"
@@ -57,28 +56,22 @@ func (da *directionsAggregator) getAggregatedDirections() []rune {
 	asComplex := complex128(*da)
 	lr := real(asComplex)
 	du := imag(asComplex)
-	alr := math.Abs(lr)
-	adu := math.Abs(du)
-	var lsString string
-	ilr := int(alr)
-	if lr < 0 {
-		lsString = strings.Repeat("R", ilr)
-	} else if lr > 0 {
-		lsString = strings.Repeat("L", ilr)
-	} else {
-		lsString = ""
+	printDirectionString := func(total int, plus rune, minus rune) string {
+		intAbs := func(i int) int {
+			if i < 0 {
+				return -i
+			}
+			return i
+		}
+		if total < 0 {
+			return strings.Repeat(string(minus), intAbs(total))
+		} else if total > 0 {
+			return strings.Repeat(string(plus), intAbs(total))
+		} else {
+			return ""
+		}
 	}
-
-	var duString string
-	idu := int(adu)
-	if du < 0 {
-		duString = strings.Repeat("U", idu)
-	} else if du > 0 {
-		duString = strings.Repeat("D", idu)
-	} else {
-		duString = ""
-	}
-	result := duString + lsString
+	result := printDirectionString(int(du), 'D', 'U') + printDirectionString(int(lr), 'L', 'R')
 	sort.Strings(strings.Split(result, ""))
 	return bytes.Runes([]byte(result))
 }
