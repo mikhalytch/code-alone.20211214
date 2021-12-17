@@ -32,6 +32,16 @@ func TestReadAdvent6File(t *testing.T) {
 	})
 }
 
+func TestCalcAdvent6Result(t *testing.T) {
+	filename := "advent_6.sample"
+	want := "R"
+	inputFile := readAdvent6File(filename)
+	result := calcAdvent6Result(&inputFile)
+	got := result.print()
+
+	assertStrings(t, got, want)
+}
+
 func assertStrings(t *testing.T, got string, want string) {
 	if got != want {
 		t.Errorf("Got %s, want %s", got, want)
