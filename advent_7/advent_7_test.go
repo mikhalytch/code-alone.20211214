@@ -43,7 +43,7 @@ func TestCalcAdvent7Result(t *testing.T) {
 	inputFile := readAdvent7File(filename)
 	gotResult := calcAdvent7File(inputFile)
 
-	got := gotResult.value
+	got := gotResult.all
 	assertInt64(t, got, want)
 }
 

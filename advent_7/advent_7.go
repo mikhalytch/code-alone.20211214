@@ -13,15 +13,43 @@ func main() {
 	filename := "advent_7.test.txt"
 	inputFile := readAdvent7File(filename)
 	result := calcAdvent7File(inputFile)
-	log.Printf("Answer: %d", result.value)
+	log.Printf("Answer: %v (and existing-only: %v)", result.all, result.existing)
 }
 
 type advent7Result struct {
-	value int64
+	all      int64
+	existing int64
 }
 
+func numberExistsAnywhere(n64 int64, inputFile advent7File) bool {
+	for _, line := range inputFile.lines {
+		for _, num := range line.jars {
+			if num == n64 {
+				return true
+			}
+		}
+	}
+	return false
+}
 func calcAdvent7File(inputFile advent7File) advent7Result {
-	return advent7Result{}
+	result := advent7Result{0, 0}
+	type zeroLineNumbered struct {
+		idx  int
+		line advent7FileLine
+	}
+	zeroLines := make([]zeroLineNumbered, 0)
+	for lineIndex, fileLine := range inputFile.lines {
+		if fileLine.jarsAmt == 0 {
+			lineNumber := lineIndex + 1
+			ln64 := int64(lineNumber)
+			result.all += ln64
+			if numberExistsAnywhere(ln64, inputFile) {
+				zeroLines = append(zeroLines, zeroLineNumbered{lineNumber, fileLine})
+				result.existing += ln64
+			}
+		}
+	}
+	return result
 }
 
 type advent7File struct {
