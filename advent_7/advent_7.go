@@ -69,7 +69,7 @@ func readAdvent7File(filename string) advent7File {
 	}
 	defer func() {
 		err := file.Close()
-		if err != nil { // todo refactor: these file openers should be
+		if err != nil {
 			log.Println(fmt.Errorf("unable to close file %q: %w", filename, err))
 		}
 	}()
