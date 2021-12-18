@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"math"
+	"os"
 	"sort"
 )
 
@@ -181,9 +183,12 @@ func calcAdvent8Result(inputFile advent8File) advent8Result {
 	return advent8Result{}
 }
 
-type advent8File struct {
-}
+type advent8File string
 
 func readAdvent8File(filename string) advent8File {
-	return advent8File{}
+	readFile, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal(fmt.Errorf("unable to open file %q: %w", filename, err))
+	}
+	return advent8File(readFile)
 }

@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+func TestReadAdvent8File(t *testing.T) {
+	filename := "advent_8.sample"
+	want := "2233"
+	got := readAdvent8File(filename)
+
+	assertStrings(t, string(got), want)
+}
+
 func TestCalcAdvent8Result(t *testing.T) {
 	filename := "advent_8.sample"
 	want := "BE"
