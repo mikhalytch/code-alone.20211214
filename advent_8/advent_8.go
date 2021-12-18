@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"sort"
+	"strings"
 )
 
 func main() {
@@ -91,7 +92,8 @@ func shortestRuneArrays(variants ...[]rune) [][]rune {
 func asRunes(in string) []rune {
 	return bytes.Runes([]byte(in))
 }
-func addPermutations(current [][]rune, variants ...[]rune) [][]rune {
+func addPermutations(current [][]rune, r rune, amt int) [][]rune {
+	variants := createPermutations(r, amt)
 	result := make([][]rune, 0, len(current))
 
 	// to save from OOM, only shortest variants will stay
@@ -101,132 +103,70 @@ func addPermutations(current [][]rune, variants ...[]rune) [][]rune {
 			n := make([]rune, 0)
 			n = append(n, v...)
 			result = append(result, n)
-		}
-		for _, c := range current {
-			n := make([]rune, 0)
-			n = append(n, c...)
-			n = append(n, v...)
-			result = append(result, n)
+		} else {
+			for _, c := range current {
+				n := make([]rune, 0)
+				n = append(n, c...)
+				n = append(n, v...)
+				result = append(result, n)
+			}
 		}
 	}
 	return result
+}
+func createPermutations(r rune, amt int) [][]rune {
+	var symbols []rune
+
+	switch r {
+	case '2':
+		symbols = asRunes("ABC")
+	case '3':
+		symbols = asRunes("DEF")
+	case '4':
+		symbols = asRunes("GHI")
+	case '5':
+		symbols = asRunes("JKL")
+	case '6':
+		symbols = asRunes("MNO")
+	case '7':
+		symbols = asRunes("PQRS")
+	case '8':
+		symbols = asRunes("TUV")
+	case '9':
+		symbols = asRunes("WXYZ")
+	}
+	amounts := make([]int, len(symbols))
+	leftover := amt
+	for revIdx := len(symbols); revIdx > 0; revIdx-- {
+		l := leftover
+		leftover = l % revIdx
+		amounts[revIdx-1] = l / revIdx
+	}
+	result := ""
+	for idx, amount := range amounts {
+		result += strings.Repeat(string(symbols[idx]), amount)
+	}
+	return append(make([][]rune, 0), asRunes(result))
 }
 
 func createCodeVariants(in string) []string {
 	result := make([][]rune, 0)
 	inLen := len(in)
 	for runeIdx := 0; runeIdx < inLen; {
+
 		r := in[runeIdx]
-		r2b := false
-		if runeIdx+1 < inLen && in[runeIdx+1] == r {
-			r2b = true
+
+		// 1. need to find max available length of equal numbers
+		addendum := 1 // amount of equal numbers
+		for ; runeIdx+addendum < inLen; addendum++ {
+			if in[runeIdx+addendum] != r {
+				break
+			}
 		}
-		r3b := false
-		if r2b && runeIdx+2 < inLen && in[runeIdx+2] == r {
-			r3b = true
-		}
-		r4b := false
-		if r3b && runeIdx+3 < inLen && in[runeIdx+3] == r {
-			r4b = true
-		}
-		switch r {
-		case '2': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("AAA"), asRunes("AB"), asRunes("BA"), asRunes("C"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("AA"), asRunes("B"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("A"))
-				runeIdx += 1
-			}
-		case '3': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("DDD"), asRunes("DE"), asRunes("ED"), asRunes("F"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("DD"), asRunes("E"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("D"))
-				runeIdx += 1
-			}
-		case '4': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("GGG"), asRunes("GH"), asRunes("HG"), asRunes("I"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("GG"), asRunes("H"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("G"))
-				runeIdx += 1
-			}
-		case '5': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("JJJ"), asRunes("JK"), asRunes("KJ"), asRunes("L"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("JJ"), asRunes("K"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("J"))
-				runeIdx += 1
-			}
-		case '6': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("MMM"), asRunes("MN"), asRunes("NM"), asRunes("O"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("MM"), asRunes("N"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("M"))
-				runeIdx += 1
-			}
-		case '7': // 4
-			if r4b {
-				result = addPermutations(result, asRunes("PPPP"), asRunes("QPP"), asRunes("PQP"), asRunes("PPQ"), asRunes("QQ"), asRunes("PR"), asRunes("RP"), asRunes("S"))
-				runeIdx += 4
-			} else if r3b {
-				result = addPermutations(result, asRunes("PPP"), asRunes("PQ"), asRunes("QP"), asRunes("R"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("PP"), asRunes("Q"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("P"))
-				runeIdx += 1
-			}
-		case '8': // 3
-			if r3b {
-				result = addPermutations(result, asRunes("TTT"), asRunes("TU"), asRunes("UT"), asRunes("V"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("TT"), asRunes("U"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("T"))
-				runeIdx += 1
-			}
-		case '9': // 4
-			if r4b {
-				result = addPermutations(result, asRunes("WWWW"), asRunes("XWW"), asRunes("WWX"), asRunes("WXW"), asRunes("XX"), asRunes("WY"), asRunes("YW"), asRunes("Z"))
-				runeIdx += 4
-			} else if r3b {
-				result = addPermutations(result, asRunes("WWW"), asRunes("WX"), asRunes("XW"), asRunes("Y"))
-				runeIdx += 3
-			} else if r2b {
-				result = addPermutations(result, asRunes("WW"), asRunes("X"))
-				runeIdx += 2
-			} else {
-				result = addPermutations(result, asRunes("W"))
-				runeIdx += 1
-			}
-		default:
-			log.Fatalf("unexpected %v at index %d", r, runeIdx)
-		}
+
+		result = addPermutations(result, rune(r), addendum)
+
+		runeIdx += addendum
 	}
 	res := make([]string, 0, len(result))
 	for _, r := range result {
@@ -237,8 +177,11 @@ func createCodeVariants(in string) []string {
 
 func calcAdvent8Result(inputFile advent8File) advent8Result {
 	variants := createCodeVariants(string(inputFile))
-	min := lexicographicallyMinimalString(variants)
-	return advent8Result{min}
+	result := advent8Result{}
+	if len(variants) != 0 {
+		result.value = lexicographicallyMinimalString(variants)
+	}
+	return result
 }
 
 type advent8File string
