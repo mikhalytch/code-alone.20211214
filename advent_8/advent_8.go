@@ -41,20 +41,51 @@ func shortestStrings(variants []string) []string {
 	}
 	return shortStrings
 }
-func shortestRuneArrays(variants ...[]rune) [][]rune {
-	minLength := math.MaxInt
-	var shortArrays [][]rune
+func lexicographicallyMinimalPermutations(variants []string) []string {
+	perLen := make(map[int][]string, 0)
 	for _, v := range variants {
-		curLen := len(v)
-		if curLen < minLength {
-			minLength = curLen
-			shortArrays = make([][]rune, 0, 1)
-			shortArrays = append(shortArrays, v)
-		} else if curLen == minLength {
-			shortArrays = append(shortArrays, v)
+		l := len(v)
+		if _, ok := perLen[l]; !ok {
+			perLen[l] = make([]string, 0)
 		}
+		perLen[l] = append(perLen[l], v)
 	}
-	return shortArrays
+	result := make([]string, 0)
+	for _, v := range perLen {
+		minimalString := lexicographicallyMinimalString(v)
+		result = append(result, minimalString)
+	}
+
+	return result
+}
+func shortestRuneArrays(variants ...[]rune) [][]rune {
+	vs := make([]string, 0, len(variants))
+	for _, v := range variants {
+		vs = append(vs, string(v))
+	}
+
+	min := lexicographicallyMinimalPermutations(vs)
+
+	res := make([][]rune, 0, len(min))
+	for _, m := range min {
+		res = append(res, bytes.Runes([]byte(m)))
+	}
+
+	return res
+
+	//minLength := math.MaxInt
+	//var shortArrays [][]rune
+	//for _, v := range variants {
+	//	curLen := len(v)
+	//	if curLen < minLength {
+	//		minLength = curLen
+	//		shortArrays = make([][]rune, 0, 1)
+	//		shortArrays = append(shortArrays, v)
+	//	} else if curLen == minLength {
+	//		shortArrays = append(shortArrays, v)
+	//	}
+	//}
+	//return shortArrays
 }
 
 func asRunes(in string) []rune {
@@ -62,15 +93,18 @@ func asRunes(in string) []rune {
 }
 func addPermutations(current [][]rune, variants ...[]rune) [][]rune {
 	result := make([][]rune, 0, len(current))
-	if len(current) == 0 {
-		current = append(current, make([]rune, 0))
-	}
-	for _, c := range current {
-		// to save from OOM, only shortest variants will stay
-		shortVariants := shortestRuneArrays(variants...)
-		for _, v := range shortVariants {
-			n := make([]rune, len(c))
-			copy(n, c)
+
+	// to save from OOM, only shortest variants will stay
+	variants = shortestRuneArrays(variants...)
+	for _, v := range variants {
+		if len(current) == 0 {
+			n := make([]rune, 0)
+			n = append(n, v...)
+			result = append(result, n)
+		}
+		for _, c := range current {
+			n := make([]rune, 0)
+			n = append(n, c...)
 			n = append(n, v...)
 			result = append(result, n)
 		}

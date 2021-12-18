@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -23,7 +23,13 @@ func TestCalcAdvent8Result(t *testing.T) {
 
 		assertStrings(t, gotResult.value, want)
 	})
-	t.Run("check real file by calculating to code, then back", func(t *testing.T) {
+	t.Run("Kevin's variant", func(t *testing.T) {
+		want := "AC"
+		got := calcAdvent8Result("2222")
+
+		assertStrings(t, got.value, want)
+	})
+	/*t.Run("check real file by calculating to code, then back", func(t *testing.T) {
 		filename := "advent_8.test.txt"
 		inputFile := readAdvent8File(filename)
 		gotResult := calcAdvent8Result(inputFile)
@@ -91,7 +97,7 @@ func TestCalcAdvent8Result(t *testing.T) {
 		}
 		reverse := rev(gotResult.value)
 		assertStrings(t, reverse, string(inputFile))
-	})
+	})*/
 }
 
 func TestCreateCodeVariants(t *testing.T) {
@@ -100,15 +106,16 @@ func TestCreateCodeVariants(t *testing.T) {
 		in       string
 		variants []string
 	}{
-		{"sample variant", "2233", []string{ /*"AADD", "AAE", "BDD",*/ "BE"}},
-		{"Kevin's variant", "222", []string{ /*"AAA", "AB", "BA",*/ "C"}},
+		{"sample variant", "2233", []string{"AADD", "BDD", "AAE", "BE"}},
+		{"Kevin's variant", "222", []string{"C", "AAA", "AB"}},
+		{"another Kevin's variant", "2222", []string{"AC", "CA", "BB", "ABA", "BAA", "AAB", "AAAA"}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			want := test.variants
 			got := createCodeVariants(test.in)
 
-			assertSlices(t, got, want)
+			assertSortedSlices(t, got, want)
 		})
 	}
 }
@@ -117,6 +124,11 @@ func assertSlices(t *testing.T, got []string, want []string) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %v, want %v", got, want)
 	}
+}
+func assertSortedSlices(t *testing.T, got []string, want []string) {
+	sort.Strings(got)
+	sort.Strings(want)
+	assertSlices(t, got, want)
 }
 
 func TestLexicographicallyMinimalString(t *testing.T) {
