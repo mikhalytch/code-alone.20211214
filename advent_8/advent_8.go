@@ -21,6 +21,12 @@ type advent8Result struct {
 }
 
 func lexicographicallyMinimalString(variants []string) string {
+	shortStrings := shortestStrings(variants)
+	sort.Strings(shortStrings)
+	return shortStrings[0]
+}
+
+func shortestStrings(variants []string) []string {
 	minLength := math.MaxInt
 	var shortStrings []string
 	for _, v := range variants {
@@ -33,8 +39,22 @@ func lexicographicallyMinimalString(variants []string) string {
 			shortStrings = append(shortStrings, v)
 		}
 	}
-	sort.Strings(shortStrings)
-	return shortStrings[0]
+	return shortStrings
+}
+func shortestRuneArrays(variants ...[]rune) [][]rune {
+	minLength := math.MaxInt
+	var shortArrays [][]rune
+	for _, v := range variants {
+		curLen := len(v)
+		if curLen < minLength {
+			minLength = curLen
+			shortArrays = make([][]rune, 0, 1)
+			shortArrays = append(shortArrays, v)
+		} else if curLen == minLength {
+			shortArrays = append(shortArrays, v)
+		}
+	}
+	return shortArrays
 }
 
 func asRunes(in string) []rune {
@@ -46,7 +66,9 @@ func addPermutations(current [][]rune, variants ...[]rune) [][]rune {
 		current = append(current, make([]rune, 0))
 	}
 	for _, c := range current {
-		for _, v := range variants {
+		// to save from OOM, only shortest variants will stay
+		shortVariants := shortestRuneArrays(variants...)
+		for _, v := range shortVariants {
 			n := make([]rune, len(c))
 			copy(n, c)
 			n = append(n, v...)
@@ -115,7 +137,7 @@ func createCodeVariants(in string) []string {
 				result = addPermutations(result, asRunes("JJ"), asRunes("K"))
 				runeIdx += 2
 			} else {
-				result = addPermutations(result, asRunes("K"))
+				result = addPermutations(result, asRunes("J"))
 				runeIdx += 1
 			}
 		case '6': // 3
@@ -180,7 +202,9 @@ func createCodeVariants(in string) []string {
 }
 
 func calcAdvent8Result(inputFile advent8File) advent8Result {
-	return advent8Result{}
+	variants := createCodeVariants(string(inputFile))
+	min := lexicographicallyMinimalString(variants)
+	return advent8Result{min}
 }
 
 type advent8File string
