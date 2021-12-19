@@ -35,6 +35,7 @@ func TestCalcAdvent9Result(t *testing.T) {
 		inputFile := readAdvent9File(sampleFilename)
 		gotResult := calcAdvent9Result(inputFile)
 		assertIntegers(t, gotResult.answer, 3)
+		assertIntegers(t, gotResult.amount, 3)
 	})
 }
 

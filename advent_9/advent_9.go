@@ -12,11 +12,12 @@ func main() {
 	filename := "advent_9.test.txt"
 	inputFile := readAdvent9File(filename)
 	result := calcAdvent9Result(inputFile)
-	fmt.Printf("Answer is: %v\n", result.answer)
+	fmt.Printf("Answer is: %v (and amount of so-long chains: %d)\n", result.answer, result.amount)
 }
 
 type chain struct {
-	entries map[int]bool
+	startingIndex int
+	entries       map[int]bool
 }
 
 func (c *chain) add(new int) bool {
@@ -26,8 +27,8 @@ func (c *chain) add(new int) bool {
 	c.entries[new] = true
 	return true
 }
-func newChain(capacity int) chain {
-	c := chain{make(map[int]bool, capacity)}
+func newChain(capacity int, startingIdx int) chain {
+	c := chain{startingIdx, make(map[int]bool, capacity)}
 	return c
 }
 
@@ -35,7 +36,7 @@ type chainVariants struct {
 	chains []chain
 }
 
-func (c *chainVariants) longest() []chain {
+func (c *chainVariants) longestChains() []chain {
 	result := make([]chain, 0)
 	currentMaxLen := 0
 	for _, c := range c.chains {
@@ -51,22 +52,29 @@ func (c *chainVariants) longest() []chain {
 	return result
 }
 
-func (c *chainVariants) longestLen() int {
-	longest := c.longest()
-	if len(longest) == 0 {
-		return 0
+type longest struct {
+	len    int
+	amount int
+}
+
+func (c *chainVariants) longestLen() longest {
+	l := c.longestChains()
+	result := longest{0, len(l)}
+	if result.amount != 0 {
+		result.len = len(l[0].entries)
 	}
-	return len(longest[0].entries)
+	return result
 }
 
 type advent9Result struct {
 	answer int
+	amount int
 }
 
 func calcAdvent9Result(inputFile advent9File) advent9Result {
 	variants := chainVariants{make([]chain, 0, 0)}
 	for currentInputNumberIdx := range inputFile.numbers {
-		currentChain := newChain(0)
+		currentChain := newChain(0, currentInputNumberIdx)
 
 		nextChainEntryInputNumberToTest := currentInputNumberIdx + 1 // start from current point @ input sequence
 		for currentChain.add(nextChainEntryInputNumberToTest) {
@@ -75,7 +83,9 @@ func calcAdvent9Result(inputFile advent9File) advent9Result {
 		variants.chains = append(variants.chains, currentChain)
 	}
 
-	result := advent9Result{variants.longestLen()}
+	longestLen := variants.longestLen()
+	result := advent9Result{longestLen.len, longestLen.amount}
+
 	return result
 }
 
