@@ -33,23 +33,19 @@ func newChain(capacity int, startingIdx int) chain {
 }
 
 type chainVariants struct {
-	chains []chain
+	longestSoFar   chain
+	amountThatLong int
 }
 
-func (c *chainVariants) longestChains() []chain {
-	result := make([]chain, 0)
-	currentMaxLen := 0
-	for _, c := range c.chains {
-		l := len(c.entries)
-		if l > currentMaxLen {
-			result = []chain{c}
-			currentMaxLen = l
-		} else if l == currentMaxLen {
-			result = append(result, c)
-		}
+func (cv *chainVariants) addChain(c chain) {
+	thisL := len(c.entries)
+	longestL := len(cv.longestSoFar.entries)
+	if thisL > longestL {
+		cv.longestSoFar = c
+		cv.amountThatLong = 1
+	} else if thisL == longestL {
+		cv.amountThatLong += 1
 	}
-
-	return result
 }
 
 type longest struct {
@@ -57,13 +53,8 @@ type longest struct {
 	amount int
 }
 
-func (c *chainVariants) longestLen() longest {
-	l := c.longestChains()
-	result := longest{0, len(l)}
-	if result.amount != 0 {
-		result.len = len(l[0].entries)
-	}
-	return result
+func (cv *chainVariants) longestLen() longest {
+	return longest{len(cv.longestSoFar.entries), cv.amountThatLong}
 }
 
 type advent9Result struct {
@@ -72,7 +63,7 @@ type advent9Result struct {
 }
 
 func calcAdvent9Result(inputFile advent9File) advent9Result {
-	variants := chainVariants{make([]chain, 0, 0)}
+	variants := chainVariants{}
 	for currentInputNumberIdx := range inputFile.numbers {
 		currentChain := newChain(0, currentInputNumberIdx)
 
@@ -80,7 +71,7 @@ func calcAdvent9Result(inputFile advent9File) advent9Result {
 		for currentChain.add(nextChainEntryInputNumberToTest) {
 			nextChainEntryInputNumberToTest = inputFile.numbers[nextChainEntryInputNumberToTest-1]
 		}
-		variants.chains = append(variants.chains, currentChain)
+		variants.addChain(currentChain)
 	}
 
 	longestLen := variants.longestLen()
