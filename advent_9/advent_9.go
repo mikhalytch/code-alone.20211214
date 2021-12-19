@@ -12,7 +12,51 @@ func main() {
 	filename := "advent_9.test.txt"
 	inputFile := readAdvent9File(filename)
 	result := calcAdvent9Result(inputFile)
-	fmt.Printf("Answer is: %v", result.answer)
+	fmt.Printf("Answer is: %v\n", result.answer)
+}
+
+type chain struct {
+	entries map[int]bool
+}
+
+func (c *chain) add(new int) bool {
+	if c.entries[new] {
+		return false
+	}
+	c.entries[new] = true
+	return true
+}
+func newChain(capacity int) chain {
+	c := chain{make(map[int]bool, capacity)}
+	return c
+}
+
+type chainVariants struct {
+	chains []chain
+}
+
+func (c *chainVariants) longest() []chain {
+	result := make([]chain, 0)
+	currentMaxLen := 0
+	for _, c := range c.chains {
+		l := len(c.entries)
+		if l > currentMaxLen {
+			result = []chain{c}
+			currentMaxLen = l
+		} else if l == currentMaxLen {
+			result = append(result, c)
+		}
+	}
+
+	return result
+}
+
+func (c *chainVariants) longestLen() int {
+	longest := c.longest()
+	if len(longest) == 0 {
+		return 0
+	}
+	return len(longest[0].entries)
 }
 
 type advent9Result struct {
@@ -20,7 +64,19 @@ type advent9Result struct {
 }
 
 func calcAdvent9Result(inputFile advent9File) advent9Result {
-	return advent9Result{}
+	variants := chainVariants{make([]chain, 0, 0)}
+	for currentInputNumberIdx := range inputFile.numbers {
+		currentChain := newChain(0)
+
+		nextChainEntryInputNumberToTest := currentInputNumberIdx + 1 // start from current point @ input sequence
+		for currentChain.add(nextChainEntryInputNumberToTest) {
+			nextChainEntryInputNumberToTest = inputFile.numbers[nextChainEntryInputNumberToTest-1]
+		}
+		variants.chains = append(variants.chains, currentChain)
+	}
+
+	result := advent9Result{variants.longestLen()}
+	return result
 }
 
 type advent9File struct {
