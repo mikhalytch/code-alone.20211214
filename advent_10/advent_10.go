@@ -12,21 +12,49 @@ func main() {
 	filename := "advent_10.test.txt"
 	inputFile := readAdvent10File(filename)
 	result := calcAdvent10Result(inputFile)
-	log.Printf("Answer: %d\n", result.answer)
+	log.Printf("Answer: %d (first seen at index %d)\n", result.answer, result.firstSeenIdx)
 }
 
 type advent10Result struct {
-	answer int
+	answer       int
+	firstSeenIdx int
+}
+
+func (r *advent10Result) addVariant(v int, idx int) {
+	if v > r.answer {
+		r.answer = v
+		r.firstSeenIdx = idx
+	}
 }
 
 func calcAdvent10Result(inputFile advent10File) advent10Result {
 	result := advent10Result{}
+	for sizeIdx := range inputFile.sizes {
+		maxVariantAtIndex := inputFile.getMaxPossibleAreaForIndex(sizeIdx)
+		result.addVariant(maxVariantAtIndex, sizeIdx)
+	}
+
 	return result
 }
 
 type advent10File struct {
 	amount int
 	sizes  []int
+}
+
+func (f *advent10File) getMaxPossibleAreaForIndex(idx int) int {
+	const minIdx = 0
+	maxIdxExclusive := f.amount
+	currentSize := f.sizes[idx]
+	leftDelta := 0
+	for ; idx-leftDelta >= minIdx && f.sizes[idx-leftDelta] >= currentSize; leftDelta++ {
+		// nop
+	}
+	rightDelta := 0
+	for ; idx+rightDelta < maxIdxExclusive && f.sizes[idx+rightDelta] >= currentSize; rightDelta++ {
+		// nop
+	}
+	return currentSize * (1 + leftDelta - 1 + rightDelta - 1)
 }
 
 func readAdvent10File(filename string) advent10File {

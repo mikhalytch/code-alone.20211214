@@ -12,17 +12,33 @@ const (
 
 func TestCalcAdvent10Result(t *testing.T) {
 	t.Run("sample file", func(t *testing.T) {
-		want := 8
 		gotResult := calcAdvent10Result(readAdvent10File(sampleFilename))
 
-		got := gotResult.answer
-		assertNumbers(t, got, want)
+		assertNumbers(t, gotResult.answer, 8)
+		assertNumbers(t, gotResult.firstSeenIdx, 2)
 	})
 }
 
 func assertNumbers(t *testing.T, got int, want int) {
 	if got != want {
 		t.Errorf("Got %v, want %v", got, want)
+	}
+}
+func TestGetMaxPossibleAreaForIndex(t *testing.T) {
+	gotFile := readAdvent10File(sampleFilename)
+	tests := []struct {
+		name  string
+		index int
+		want  int
+	}{
+		{"idx = 0", 0, 2},
+		{"idx = 2", 2, 8},
+		{"idx = 3", 3, 5},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assertNumbers(t, gotFile.getMaxPossibleAreaForIndex(test.index), test.want)
+		})
 	}
 }
 func TestReadAdvent10File(t *testing.T) {
