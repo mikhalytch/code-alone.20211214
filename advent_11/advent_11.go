@@ -29,7 +29,7 @@ func (ar *advent11Result) addAll(vs ...int) {
 func (ar *advent11Result) add(v int) {
 	ar.sequence = append(ar.sequence, v)
 }
-func (ar advent11Result) getAnswer() int64 {
+func (ar *advent11Result) getAnswer() int64 {
 	sum := int64(0)
 	for idx, v := range ar.sequence {
 		number := int64(idx + 1)
@@ -38,8 +38,56 @@ func (ar advent11Result) getAnswer() int64 {
 	return sum
 }
 
+func newSeenScreamerNumbers(capacity int) seenScreamerNumbers {
+	return make(seenScreamerNumbers, capacity)
+}
+
+type seenScreamerNumbers map[int]bool
+
+func (ssn *seenScreamerNumbers) size() int {
+	return len(*ssn)
+}
+func (ssn *seenScreamerNumbers) isSeen(number int) bool {
+	return (*ssn)[number]
+}
+func (ssn *seenScreamerNumbers) areAllSeen(numbers ...int) bool {
+	for _, n := range numbers {
+		if !ssn.isSeen(n) {
+			return false
+		}
+	}
+	return true
+}
+func (ssn *seenScreamerNumbers) addNumber(num int) {
+	(*ssn)[num] = true
+}
+
 func calcAdvent11Result(inputFile advent11File) advent11Result {
 	result := advent11Result{}
+
+	totalScreamers := inputFile.linesAmount
+	result.sequence = make([]int, 0, totalScreamers)
+
+	aggregator := newSeenScreamerNumbers(totalScreamers)
+
+	for aggregator.size() <= totalScreamers {
+		screamerIdx := 0
+		screamerNumber := screamerIdx + 1
+
+		screamerNumbersToBeRunBefore := inputFile.lines[screamerIdx].screamerNumbers
+		if !aggregator.isSeen(screamerNumber) && aggregator.areAllSeen(screamerNumbersToBeRunBefore...) {
+			aggregator.addNumber(screamerNumber)
+			screamerIdx = 0
+		} else {
+			screamerIdx++
+		}
+
+		if screamerIdx == totalScreamers && aggregator.size() != totalScreamers {
+			log.Fatalf("traversed to the last element (idx:%d), and still not seen all screamers(seen:%d)!",
+				screamerIdx, aggregator.size())
+		}
+	}
+
 	return result
 }
 
