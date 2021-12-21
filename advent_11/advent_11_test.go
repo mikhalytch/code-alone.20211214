@@ -7,11 +7,35 @@ import (
 
 const sampleFilename = "advent_11.sample"
 
+func TestGetAnswer(t *testing.T) {
+	tests := []struct {
+		name   string
+		values []int
+		want   int64
+	}{
+		{"example from sample", []int{2, 4, 3, 1}, 23},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := advent11Result{}
+			result.addAll(test.values...)
+			assertInt64s(t, result.getAnswer(), test.want)
+		})
+	}
+}
+
+func assertInt64s(t *testing.T, got int64, want int64) {
+	if got != want {
+		t.Fatalf("Got %v, want %v", got, want)
+	}
+}
+
 func TestCalcAdvent11Result(t *testing.T) {
 	t.Run("sample (example) calculation", func(t *testing.T) {
-		want := advent11Result{23}
+		wantResult := advent11Result{[]int{2, 4, 3, 1}}
 		got := calcAdvent11Result(readAdvent11File(sampleFilename))
-		assertResults(t, got, want)
+		assertResults(t, got, wantResult)
+		assertInt64s(t, got.getAnswer(), 23)
 	})
 }
 

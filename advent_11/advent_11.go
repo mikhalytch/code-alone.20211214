@@ -14,11 +14,28 @@ const realFilename = "advent_11.test.txt"
 func main() {
 	inputFile := readAdvent11File(realFilename)
 	result := calcAdvent11Result(inputFile)
-	log.Printf("Answer: %d", result.answer)
+	log.Printf("Answer: %d", result.getAnswer())
 }
 
 type advent11Result struct {
-	answer int
+	sequence []int
+}
+
+func (ar *advent11Result) addAll(vs ...int) {
+	for _, v := range vs {
+		ar.add(v)
+	}
+}
+func (ar *advent11Result) add(v int) {
+	ar.sequence = append(ar.sequence, v)
+}
+func (ar advent11Result) getAnswer() int64 {
+	sum := int64(0)
+	for idx, v := range ar.sequence {
+		number := int64(idx + 1)
+		sum += number * int64(v)
+	}
+	return sum
 }
 
 func calcAdvent11Result(inputFile advent11File) advent11Result {
