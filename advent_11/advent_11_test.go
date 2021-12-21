@@ -24,12 +24,6 @@ func TestGetAnswer(t *testing.T) {
 	}
 }
 
-func assertInt64s(t *testing.T, got int64, want int64) {
-	if got != want {
-		t.Fatalf("Got %v, want %v", got, want)
-	}
-}
-
 func TestCalcAdvent11Result(t *testing.T) {
 	t.Run("sample (example) calculation", func(t *testing.T) {
 		wantResult := advent11Result{[]int{2, 4, 3, 1}}
@@ -37,12 +31,11 @@ func TestCalcAdvent11Result(t *testing.T) {
 		assertResults(t, got, wantResult)
 		assertInt64s(t, got.getAnswer(), 23)
 	})
-}
-
-func assertResults(t *testing.T, got advent11Result, want advent11Result) {
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Got %v, want %v", got, want)
-	}
+	t.Run("some real file result calculation measures", func(t *testing.T) {
+		inputFile := readAdvent11File(realFilename)
+		gotResult := calcAdvent11Result(inputFile)
+		assertNumbers(t, len(gotResult.sequence), inputFile.linesAmount)
+	})
 }
 
 func TestReadAdvent11File(t *testing.T) {
@@ -68,6 +61,18 @@ func TestReadAdvent11File(t *testing.T) {
 		want4998Line := advent11FileLine{5, []int{696, 1702, 2148, 2654, 2997}}
 		assertFileLines(t, gotFile.lines[4998], want4998Line)
 	})
+}
+
+func assertInt64s(t *testing.T, got int64, want int64) {
+	if got != want {
+		t.Fatalf("Got %v, want %v", got, want)
+	}
+}
+
+func assertResults(t *testing.T, got advent11Result, want advent11Result) {
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Got %v, want %v", got, want)
+	}
 }
 
 func assertFileLines(t *testing.T, got advent11FileLine, want advent11FileLine) {
