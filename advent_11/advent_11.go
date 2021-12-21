@@ -63,28 +63,32 @@ func (ssn *seenScreamerNumbers) addNumber(num int) {
 }
 
 func calcAdvent11Result(inputFile advent11File) advent11Result {
-	result := advent11Result{}
-
 	totalScreamers := inputFile.linesAmount
+	result := advent11Result{make([]int, totalScreamers)}
+
 	result.sequence = make([]int, 0, totalScreamers)
 
 	aggregator := newSeenScreamerNumbers(totalScreamers)
 
-	for aggregator.size() <= totalScreamers {
-		screamerIdx := 0
+	for screamerIdx, loopIdx := 0, 0; aggregator.size() < totalScreamers; {
 		screamerNumber := screamerIdx + 1
 
 		screamerNumbersToBeRunBefore := inputFile.lines[screamerIdx].screamerNumbers
 		if !aggregator.isSeen(screamerNumber) && aggregator.areAllSeen(screamerNumbersToBeRunBefore...) {
 			aggregator.addNumber(screamerNumber)
+			result.add(screamerNumber)
 			screamerIdx = 0
 		} else {
 			screamerIdx++
 		}
 
-		if screamerIdx == totalScreamers && aggregator.size() != totalScreamers {
-			log.Fatalf("traversed to the last element (idx:%d), and still not seen all screamers(seen:%d)!",
-				screamerIdx, aggregator.size())
+		if loopIdx == totalScreamers && aggregator.size() != totalScreamers {
+			log.Fatalf("traversed to the last element (num:%d), and still not seen all screamers(seen:%d)!",
+				screamerNumber, aggregator.size())
+		}
+		if screamerIdx == totalScreamers {
+			screamerIdx = 0
+			loopIdx++
 		}
 	}
 
