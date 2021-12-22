@@ -9,7 +9,8 @@ import (
 
 func main() {
 	result := calcAdvent12Result(14)
-	log.Printf("Answer: %d (%v)", result.answer, result.multiples)
+	log.Printf("Answer: %d (%v)\n", result.answer, result.multiples)
+	log.Printf("cache size has %d entries\n", len(nextPrimesCache))
 }
 
 type advent12Result struct {
@@ -30,16 +31,17 @@ func calcAdvent12Result(digitsAmount int) advent12Result {
 	pChecker := primesChecker(100)
 
 	result := advent12Result{}
-	currentPrime := int64(2)
+	currentPrime := int64(2) // start with 2 (since 1*99 is biggest of 2-digit numbers)
 	for digitsChecker.isBelowHighBorder(currentPrime) {
 		variants := primeVariants(currentPrime, pChecker)
 		ps := pairs(variants)
 		addVariants(ps, &result, digitsChecker, pChecker)
-		c, err := nextPrime(currentPrime, pChecker)
-		if err != nil {
+		c := nextPrimeNoCheck(currentPrime)
+		currentPrime = c
+		currentPrimePow2 := currentPrime * currentPrime
+		if !digitsChecker.isBelowHighBorder(currentPrimePow2) {
 			break
 		}
-		currentPrime = c
 	}
 
 	return result
@@ -50,10 +52,21 @@ var noPrime = fmt.Errorf("no prime within reach")
 // return `noPrime` error if no prime for checker limits exists
 var b = new(big.Int)
 
+func nextPrimeNoCheck(curPrime int64) int64 {
+	num, _ := nextPrime(curPrime, math.MaxInt64)
+	return num
+}
+
+var nextPrimesCache = make(map[int64]int64)
+
 func nextPrime(curPrime int64, checker primesChecker) (int64, error) {
+	if cached := nextPrimesCache[curPrime]; cached != 0 {
+		return cached, nil
+	}
 	for n := curPrime + 1; checker.isFit(curPrime, n); n++ {
 		b.SetInt64(n)
 		if b.ProbablyPrime(0) {
+			nextPrimesCache[curPrime] = n
 			return n, nil
 		}
 	}
