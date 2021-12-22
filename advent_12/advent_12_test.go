@@ -2,6 +2,36 @@ package main
 
 import "testing"
 
+func TestCalcAdvent12Result(t *testing.T) {
+	tests := []struct {
+		name         string
+		digitsAmount int
+		want         advent12Result
+	}{
+		{"sample 2 digits => 95", 2, advent12Result{95, [2]int64{5, 19}}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			gotResult := calcAdvent12Result(test.digitsAmount)
+			want := test.want
+			assertInt64(t, gotResult.answer, want.answer)
+			assertAdvent12Results(t, gotResult, want)
+		})
+	}
+}
+
+func assertAdvent12Results(t *testing.T, got advent12Result, want advent12Result) {
+	if got != want {
+		t.Fatalf("Got %v, want %v", got, want)
+	}
+}
+
+func assertInt64(t *testing.T, got int64, want int64) {
+	if got != want {
+		t.Fatalf("Got %d, want %d", got, want)
+	}
+}
+
 func TestIsFit(t *testing.T) {
 	tests := []struct {
 		name            string
@@ -26,6 +56,6 @@ func TestIsFit(t *testing.T) {
 
 func assertBool(t *testing.T, want bool, got bool) {
 	if want != got {
-		t.Errorf("Got %v, want %v", got, want)
+		t.Fatalf("Got %v, want %v", got, want)
 	}
 }

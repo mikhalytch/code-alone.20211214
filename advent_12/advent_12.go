@@ -1,18 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 )
 
 func main() {
-	maxInt32 := math.MaxInt32
-	maxInt32Str := fmt.Sprintf("%d", maxInt32)
-	log.Println(fmt.Sprintf("maxInt32 %d has %d characters", maxInt32, len(maxInt32Str)))
-	maxInt64 := math.MaxInt64
-	maxInt64Str := fmt.Sprintf("%d", maxInt64)
-	log.Println(fmt.Sprintf("maxInt64 %d has %d characters", maxInt64, len(maxInt64Str)))
+	result := calcAdvent12Result(14)
+	log.Printf("Answer: %d (%v)", result.answer, result.multiples)
+}
+
+func calcAdvent12Result(digitsAmount int) advent12Result {
+	return advent12Result{}
+}
+
+type advent12Result struct {
+	answer    int64
+	multiples [2]int64
 }
 
 func newDigitsAmountChecker(digitsAmount int) digitsAmountChecker {
