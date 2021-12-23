@@ -23,6 +23,12 @@ func TestReadAdvent13File(t *testing.T) {
 	})
 }
 
+func TestCalcAdvent13Result(t *testing.T) {
+	gotResult := calcAdvent13Result(readAdvent13File(sampleFilename))
+	want := "+7-(999)-1-1-1-1-1-1-1"
+	assertStrings(t, gotResult.answer, want)
+}
+
 func assertStrings(t *testing.T, got string, want string) {
 	if got != want {
 		t.Fatalf("Got %s, want %s", got, want)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -21,8 +23,73 @@ type advent13Result struct {
 	answer string
 }
 
+func newPhonesCalculator(capacity int) *phonesCalculator {
+	return &phonesCalculator{make([]string, 0, capacity), make(map[string]string, capacity)}
+}
+
+type phonesCalculator struct {
+	fixedPhones      []string
+	fixedToSrcPhones map[string]string
+}
+
+func (calc *phonesCalculator) isValid() bool {
+	return len(calc.fixedPhones) == len(calc.fixedToSrcPhones)
+}
+func (calc *phonesCalculator) addPhone(phone string) {
+	fixedPhone := fixPhone(phone)
+	calc.fixedPhones = append(calc.fixedPhones, fixedPhone)
+	calc.fixedToSrcPhones[fixedPhone] = phone
+	if !calc.isValid() {
+		log.Fatalf("calc became invalid after adding %q number (fixed: %q)\n", phone, fixedPhone)
+	}
+}
+
+const openBracket = "("
+
+func fixPhone(phone string) string {
+	noCodePhone := phone
+	openBracketsAmt := strings.Count(phone, openBracket)
+	if openBracketsAmt != 0 {
+		split := strings.Split(phone, openBracket)
+		if len(split) != 2 {
+			log.Fatalf("phone %q has unexpected brackets amount\n", phone)
+		}
+		noCodePhone = split[1]
+	}
+	// replace all non-nums with ""
+	nonNumRe := regexp.MustCompile("[^0-9]")
+	fixed := nonNumRe.ReplaceAllString(noCodePhone, "")
+	// check only numbers exist
+	numOnlyRe := regexp.MustCompile("^[0-9]+$")
+	isFixed := numOnlyRe.Match([]byte(fixed))
+	if !isFixed {
+		log.Fatalf("phone %q was not fixed: %q\n", phone, fixed)
+	}
+	// return
+	return fixed
+}
+func (calc *phonesCalculator) addAllPhones(phones []string) {
+	for _, p := range phones {
+		calc.addPhone(p)
+	}
+}
+func (calc *phonesCalculator) sort() {
+	sort.Strings(calc.fixedPhones)
+}
+
+// does not sort
+func (calc *phonesCalculator) getPhoneByNumber(num int) string {
+	phoneIdx := num - 1
+	fixedPhone := calc.fixedPhones[phoneIdx]
+	phone := calc.fixedToSrcPhones[fixedPhone]
+	return phone
+}
+
 func calcAdvent13Result(inputFile advent13File) advent13Result {
-	result := advent13Result{}
+	calculator := newPhonesCalculator(inputFile.amount)
+	calculator.addAllPhones(inputFile.phones)
+	calculator.sort()
+	result := advent13Result{calculator.getPhoneByNumber(inputFile.ascNum)}
 	return result
 }
 
