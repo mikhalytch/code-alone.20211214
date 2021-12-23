@@ -44,29 +44,35 @@ func (calc *phonesCalculator) addPhone(phone string) {
 	}
 }
 
-const openBracket = "("
-
 func fixPhone(phone string) string {
-	noCodePhone := phone
-	openBracketsAmt := strings.Count(phone, openBracket)
-	if openBracketsAmt != 0 {
-		split := strings.Split(phone, openBracket)
-		if len(split) != 2 {
-			log.Fatalf("phone %q has unexpected brackets amount\n", phone)
-		}
-		noCodePhone = split[1]
-	}
+	cleanBeforeBracketPhone := phone
+	//openBracketsAmt := strings.Count(phone, openBracket)
+	//if openBracketsAmt != 0 {
+	//	split := strings.Split(phone, openBracket)
+	//	if len(split) != 2 {
+	//		log.Fatalf("phone %q has unexpected brackets amount\n", phone)
+	//	}
+	//	cleanBeforeBracketPhone = split[1]
+	//}
 	// replace all non-nums with ""
 	nonNumRe := regexp.MustCompile("[^0-9]")
-	fixed := nonNumRe.ReplaceAllString(noCodePhone, "")
+	numbersOnlyPhone := nonNumRe.ReplaceAllString(cleanBeforeBracketPhone, "")
 	// check only numbers exist
 	numOnlyRe := regexp.MustCompile("^[0-9]+$")
-	isFixed := numOnlyRe.Match([]byte(fixed))
+	isFixed := numOnlyRe.Match([]byte(numbersOnlyPhone))
 	if !isFixed {
-		log.Fatalf("phone %q was not fixed: %q\n", phone, fixed)
+		log.Fatalf("phone %q can not be changed numbers-only: %q\n", phone, numbersOnlyPhone)
+	}
+	numbersOnlyPhoneLen := len(numbersOnlyPhone)
+	if numbersOnlyPhoneLen < 10 {
+		log.Fatalf("phone %q number is too short after removing punctuation: %q\n", phone, numbersOnlyPhone)
+	}
+	charsOf10Number := numbersOnlyPhone[numbersOnlyPhoneLen-10:]
+	if len(charsOf10Number) != 10 {
+		log.Fatalf("unable to shorten number %q to 10 characters: %q", phone, charsOf10Number)
 	}
 	// return
-	return fixed
+	return charsOf10Number
 }
 func (calc *phonesCalculator) addAllPhones(phones []string) {
 	for _, p := range phones {
@@ -75,6 +81,10 @@ func (calc *phonesCalculator) addAllPhones(phones []string) {
 }
 func (calc *phonesCalculator) sort() {
 	sort.Strings(calc.fixedPhones)
+	//log.Println("sorted phones:")
+	//for _, f := range calc.fixedPhones {
+	//	fmt.Printf("%v %q %q\n", len(f), f, calc.fixedToSrcPhones[f])
+	//}
 }
 
 // does not sort
