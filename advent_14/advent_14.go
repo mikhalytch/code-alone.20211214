@@ -1,6 +1,14 @@
 package main
 
-import "log"
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
 
 const realFilename = "advent_14.test.txt"
 
@@ -18,6 +26,14 @@ func calcAdvent14Result(inputFile advent14File) advent14Result {
 	return advent14Result{}
 }
 
+func calcMedian(set []rune) rune {
+	return 0
+}
+
+func createLimitedSet(restricted []rune) []rune {
+	return nil
+}
+
 type simpleRestriction struct {
 	codePosition     int
 	restrictedSymbol rune
@@ -29,13 +45,48 @@ type advent14File struct {
 }
 
 func readAdvent14File(filename string) advent14File {
-	return advent14File{}
-}
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatalln(fmt.Errorf("error opening file %q: %w", filename, err))
+	}
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			log.Println(fmt.Errorf("error closing file %q: %w", filename, err))
+		}
+	}()
 
-func calcMedian(set []rune) rune {
-	return 0
-}
+	lineScanner := bufio.NewScanner(file)
+	lineScanner.Split(bufio.ScanLines)
+	result := advent14File{}
 
-func createLimitedSet(restricted []rune) []rune {
-	return nil
+	for lineIdx := 0; lineScanner.Scan(); lineIdx++ {
+		lineText := lineScanner.Text()
+		wordScanner := bufio.NewScanner(strings.NewReader(lineText))
+		wordScanner.Split(bufio.ScanWords)
+
+		wordScanner.Scan()
+		fWord := wordScanner.Text()
+		fNum, err := strconv.Atoi(fWord)
+		if err != nil {
+			log.Fatalln(fmt.Errorf("nan %q lineIdx %d word 1: %w", fWord, lineIdx, err))
+		}
+		wordScanner.Scan()
+		sWord := wordScanner.Text()
+
+		switch lineIdx {
+		case 0:
+			result.codeLength = fNum
+			result.rulesAmount, err = strconv.Atoi(sWord)
+			if err != nil {
+				log.Fatalln(fmt.Errorf("nan %q lineIdx %d word 2: %w", sWord, lineIdx, err))
+			}
+			result.rules = make([]simpleRestriction, 0, result.rulesAmount)
+		default:
+			restriction := simpleRestriction{fNum, bytes.Runes([]byte(sWord))[0]}
+			result.rules = append(result.rules, restriction)
+		}
+	}
+
+	return result
 }
