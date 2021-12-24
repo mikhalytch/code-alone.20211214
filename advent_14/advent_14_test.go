@@ -29,6 +29,30 @@ func TestCalcAdvent14Result(t *testing.T) {
 		got := gotResult.answer
 		assertStrings(t, got, want)
 	})
+	t.Run("real file calculation (some checks)", func(t *testing.T) {
+		inputFile := readAdvent14File(realFilename)
+		gotResult := calcAdvent14Result(inputFile)
+		assertInts(t, len(gotResult.answer), inputFile.codeLength)
+	})
+}
+
+func TestGroupPositionRules(t *testing.T) {
+	tests := []struct {
+		name               string
+		codeNumber         int
+		wantedRestrictions []rune
+	}{
+		{"real file, #95", 95, []rune{'N', 'R', 'Y', 'D', 'B', 'Q', 'L', 'T', 'O', 'Z', 'G', 'P', 'M'}},
+		{"real file, #96", 96, []rune{'I', 'L', 'M', 'P', 'K', 'O', 'G'}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			inputFile := readAdvent14File(realFilename)
+			got := groupPositionRules(inputFile.rules)
+			want := test.wantedRestrictions
+			assertRuneSlices(t, got[test.codeNumber], want)
+		})
+	}
 }
 
 func TestCalcMedian(t *testing.T) {
@@ -46,6 +70,8 @@ func TestCalcMedian(t *testing.T) {
 		{"A-D : C", []rune{'A', 'B', 'C', 'D'}, 'B'},
 		{"A-E : C", []rune{'A', 'B', 'C', 'D', 'E'}, 'C'},
 		{"X, A, B, C : B", []rune{'X', 'A', 'B', 'C'}, 'B'},
+		{"real file code pos #95", []rune{'A', 'C', 'E', 'F', 'H', 'I', 'J', 'K', 'S', 'U', 'V', 'W', 'X'}, 'J'},
+		{"real file code pos #96", []rune{'A', 'B', 'C', 'D', 'E', 'F', 'H', 'J', 'N', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}, 'Q'},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -72,6 +98,10 @@ func TestCreateLimitedSet(t *testing.T) {
 			[]rune{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'}},
 		{"minus J & O", []rune{'J', 'O'},
 			[]rune{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}},
+		{"real file code pos #95 restrictions", []rune{'N', 'R', 'Y', 'D', 'B', 'Q', 'L', 'T', 'O', 'Z', 'G', 'P', 'M'},
+			[]rune{'A', 'C', 'E', 'F', 'H', 'I', 'J', 'K', 'S', 'U', 'V', 'W', 'X'}},
+		{"real file code pos #96 restrictions", []rune{'I', 'L', 'M', 'P', 'K', 'O', 'G'},
+			[]rune{'A', 'B', 'C', 'D', 'E', 'F', 'H', 'J', 'N', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

@@ -24,9 +24,27 @@ type advent14Result struct {
 }
 
 func calcAdvent14Result(inputFile advent14File) advent14Result {
-	result := advent14Result{}
+	rules := inputFile.rules
+	perPosRestrictions := groupPositionRules(rules)
 
-	return result
+	result := make([]rune, 0, inputFile.codeLength)
+	for codeNum := 1; codeNum <= inputFile.codeLength; codeNum++ {
+		result = append(result, calcMedian(createLimitedSet(perPosRestrictions[codeNum])))
+	}
+
+	return advent14Result{string(result)}
+}
+
+func groupPositionRules(rules []simpleRestriction) map[int][]rune {
+	perPosRestrictions := make(map[int][]rune, len(rules))
+	for _, r := range rules {
+		position := r.codePosition
+		if _, ok := perPosRestrictions[position]; !ok {
+			perPosRestrictions[position] = make([]rune, 0)
+		}
+		perPosRestrictions[position] = append(perPosRestrictions[position], r.restrictedSymbol)
+	}
+	return perPosRestrictions
 }
 
 func calcMedian(set []rune) rune {
@@ -121,6 +139,9 @@ func readAdvent14File(filename string) advent14File {
 			}
 			result.rules = make([]simpleRestriction, 0, result.rulesAmount)
 		default:
+			if len(sWord) > 1 {
+				log.Fatalln(fmt.Errorf("not a rune (line %d): %s", lineIdx, sWord))
+			}
 			restriction := simpleRestriction{fNum, bytes.Runes([]byte(sWord))[0]}
 			result.rules = append(result.rules, restriction)
 		}
