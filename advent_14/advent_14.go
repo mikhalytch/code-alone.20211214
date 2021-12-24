@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -27,10 +28,26 @@ func calcAdvent14Result(inputFile advent14File) advent14Result {
 }
 
 func calcMedian(set []rune) rune {
+	stringSet := make([]string, 0, len(set))
+	for _, s := range set {
+		stringSet = append(stringSet, string(s))
+	}
+	sort.Strings(stringSet)
+	stringsAmt := float64(len(stringSet))
+	for stringIdx, str := range stringSet {
+		stringsNumber := float64(stringIdx + 1)
+		if stringsNumber/stringsAmt >= 0.5 {
+			return bytes.Runes([]byte(str))[0]
+		}
+	}
 	return 0
 }
 
 func createLimitedSet(restricted []rune) []rune {
+
+	// check if restricted was present at full set
+	// error otherwise
+
 	return nil
 }
 

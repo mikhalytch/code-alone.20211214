@@ -37,12 +37,14 @@ func TestCalcMedian(t *testing.T) {
 		set  []rune
 		want rune
 	}{
-		{"B-Z",
+		{"B-Z : N",
 			[]rune{'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'},
 			'N'},
-		{"A-Y",
+		{"A-Y : M",
 			[]rune{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'},
 			'M'},
+		{"A-D : C", []rune{'A', 'B', 'C', 'D'}, 'B'},
+		{"A-E : C", []rune{'A', 'B', 'C', 'D', 'E'}, 'C'},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
