@@ -24,7 +24,9 @@ type advent14Result struct {
 }
 
 func calcAdvent14Result(inputFile advent14File) advent14Result {
-	return advent14Result{}
+	result := advent14Result{}
+
+	return result
 }
 
 func calcMedian(set []rune) rune {
@@ -43,12 +45,31 @@ func calcMedian(set []rune) rune {
 	return 0
 }
 
+var fullSetM = map[rune]bool{'A': true, 'B': true, 'C': true, 'D': true, 'E': true, 'F': true, 'G': true, 'H': true,
+	'I': true, 'J': true, 'K': true, 'L': true, 'M': true, 'N': true, 'O': true, 'P': true, 'Q': true, 'R': true,
+	'S': true, 'T': true, 'U': true, 'V': true, 'W': true, 'X': true, 'Y': true, 'Z': true}
+var fullSet = []rune{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
+
 func createLimitedSet(restricted []rune) []rune {
 
-	// check if restricted was present at full set
-	// error otherwise
+	result := make([]rune, 0)
 
-	return nil
+	restrictions := make(map[rune]bool, len(restricted))
+	for _, r := range restricted {
+		restrictions[r] = true
+
+		if !fullSetM[r] { // check if restricted was present at full set
+			log.Fatalln(fmt.Errorf("restriction %q wasn't present at full set", r)) // error otherwise
+		}
+	}
+
+	for _, f := range fullSet {
+		if !restrictions[f] {
+			result = append(result, f)
+		}
+	}
+
+	return result
 }
 
 type simpleRestriction struct {

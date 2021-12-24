@@ -45,6 +45,7 @@ func TestCalcMedian(t *testing.T) {
 			'M'},
 		{"A-D : C", []rune{'A', 'B', 'C', 'D'}, 'B'},
 		{"A-E : C", []rune{'A', 'B', 'C', 'D', 'E'}, 'C'},
+		{"X, A, B, C : B", []rune{'X', 'A', 'B', 'C'}, 'B'},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
