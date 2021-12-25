@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/bits"
 	"os"
 	"strconv"
 )
@@ -64,7 +65,7 @@ func intAbs(i int) uint64 {
 	return uint64(i)
 }
 func distance(p1, p2 point) uint64 {
-	return intAbs(p1.i-p2.i) + intAbs(p1.r-p2.r)
+	return sum(intAbs(p1.i-p2.i), intAbs(p1.r-p2.r))
 }
 
 type point struct {
@@ -77,7 +78,7 @@ func (p point) distanceTo(a point) uint64 {
 func (p point) sumDistance(ps ...point) uint64 {
 	result := uint64(0)
 	for _, a := range ps {
-		result += p.distanceTo(a)
+		result = sum(result, p.distanceTo(a))
 	}
 	return result
 }
@@ -96,5 +97,16 @@ type advent15Result struct {
 }
 
 func calcAdvent15Result(inputFile advent15File) advent15Result {
-	return advent15Result{}
+	result := advent15Result{}
+	return result
+}
+
+func sum(a, b uint64) uint64 {
+	if res, carry := bits.Add64(a, b, 0); carry != 0 {
+		log.Fatalln(fmt.Errorf("addition overflow"))
+	} else {
+		return res
+	}
+	//goland:noinspection GoUnreachableCode
+	panic("should've never get here")
 }
