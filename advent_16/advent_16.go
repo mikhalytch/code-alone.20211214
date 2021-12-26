@@ -302,18 +302,19 @@ type path struct {
 	len  int // nose.len + 1
 }
 
-func (pp path) pointsRegistry() map[point]bool {
-	result := make(map[point]bool, pp.len)
-	for current := &pp; current != nil; current = current.nose {
-		result[current.tail] = true
+func (pp *path) hasThePoint(p *point) bool {
+	for current := pp; current != nil; current = current.nose {
+		if current.tail == *p {
+			return true
+		}
 	}
-	return result
+	return false
 }
 
 // returns false in case of loop
 func (pp path) addPoint(p point) (*path, bool) {
 	newPath := path{&pp, p, pp.len + 1}
-	loopIdentified := pp.pointsRegistry()[p]
+	loopIdentified := pp.hasThePoint(&p)
 	return &newPath, !loopIdentified
 }
 
