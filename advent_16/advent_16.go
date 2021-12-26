@@ -13,16 +13,48 @@ import (
 const realFilename = "advent_16.test.txt"
 
 func main() {
+	inputFile := readAdvent16File(realFilename)
+	result := calcAdvent16Result(inputFile)
+	log.Printf("Answer: %d\n", result.answer)
+}
 
+type advent16Result struct {
+	answer int
+}
+
+func calcAdvent16Result(inputFile advent16File) advent16Result {
+	minPathsAgg := newMinPathsAggregator()
+	initialPath := createPathStart(inputFile.f.start)
+	stepRecursively(&inputFile.f, minPathsAgg, initialPath)
+
+	return advent16Result{minPathsAgg.curLen}
+}
+
+func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
+	if path.length() > f.size() {
+		return // too long (however strange this has not looped)
+	}
+	if f.isFinish(path.tail) {
+		minPathsAgg.addPath(*path)
+		return
+	}
+	moves := f.getPossibleMoves(path.tail)
+	for _, m := range moves {
+		if newPath, ok := path.addPoint(m); !ok {
+			return // loop
+		} else {
+			stepRecursively(f, minPathsAgg, newPath)
+		}
+	}
 }
 
 type fieldPosition rune
 
 const (
-	road  fieldPosition = '.'
-	wall  fieldPosition = '#'
-	start fieldPosition = 'A'
-	end   fieldPosition = 'B'
+	road   fieldPosition = '.'
+	wall   fieldPosition = '#'
+	start  fieldPosition = 'A'
+	finish fieldPosition = 'B'
 )
 
 type advent16File struct {
@@ -33,7 +65,42 @@ type field struct {
 	start point
 }
 type fieldRow struct {
-	positions []fieldPosition
+	positions []fieldPosition // columns
+}
+
+func (f *field) size() int {
+	return len(f.rows[0].positions) * len(f.rows)
+}
+func (f *field) positionAt(p point) fieldPosition {
+	return f.rows[p.y].positions[p.x]
+}
+func (f *field) isFinish(p point) bool {
+	return f.positionAt(p) == finish
+}
+func (f *field) isWalkable(p point) bool {
+	if p.x >= 0 && p.x < len(f.rows[0].positions) {
+		if p.y >= 0 && p.y < len(f.rows) {
+			switch f.positionAt(p) {
+			case wall:
+				return false
+			case finish:
+			case start:
+			case road:
+				return true
+			}
+		}
+	}
+	return false
+}
+func (f *field) getPossibleMoves(p point) []point {
+	var result []point
+	permutations := []point{{p.x + 1, p.y}, {p.x - 1, p.y}, {p.x, p.y + 1}, {p.x, p.y - 1}}
+	for _, p := range permutations {
+		if f.isWalkable(p) {
+			result = append(result, p)
+		}
+	}
+	return result
 }
 
 func readAdvent16File(filename string) advent16File {
@@ -72,8 +139,8 @@ func readAdvent16File(filename string) advent16File {
 }
 
 // aggregator
-func newMinPathsAggregator() minPathsAggregator {
-	return minPathsAggregator{curLen: math.MaxInt}
+func newMinPathsAggregator() *minPathsAggregator {
+	return &minPathsAggregator{curLen: math.MaxInt}
 }
 
 type minPathsAggregator struct {
@@ -82,7 +149,7 @@ type minPathsAggregator struct {
 }
 
 func (pa *minPathsAggregator) addPath(p path) {
-	l := p.len()
+	l := p.length()
 	if l < pa.curLen {
 		pa.paths = []path{p}
 		pa.curLen = l
@@ -91,7 +158,37 @@ func (pa *minPathsAggregator) addPath(p path) {
 	}
 }
 
+func createPathStart(start point) *path {
+	return &path{nil, start, 0}
+}
+
+// tail
 type path struct {
+	nose *path
+	tail point
+	len  int // nose.len + 1
+}
+
+func (pp path) pointsRegistry() map[point]bool {
+	result := make(map[point]bool, pp.len)
+	c := &pp
+	for ; c != nil; c = pp.nose {
+		result[c.tail] = true
+	}
+	return result
+}
+
+// returns false in case of loop
+func (pp path) addPoint(p point) (*path, bool) {
+	return &path{&pp, p, pp.len + 1}, !pp.pointsRegistry()[p]
+}
+
+// minus starting node
+func (pp path) length() int {
+	return pp.len
+}
+
+/*type path struct {
 	points         []point
 	pointsRegistry map[point]bool
 }
@@ -107,7 +204,7 @@ func (pp *path) addPoint(p point) bool {
 }
 func (pp path) len() int {
 	return len(pp.points)
-}
+}*/
 
 type point struct {
 	// coordinates; left upper corner is 0,0

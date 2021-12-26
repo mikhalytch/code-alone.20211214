@@ -22,8 +22,17 @@ func TestReadAdvent16File(t *testing.T) {
 	})
 	t.Run("read real file (some checks)", func(t *testing.T) {
 		gotFile := readAdvent16File(realFilename)
-		assertInts(t, 100, len(gotFile.f.rows[0].positions), "columns")
-		assertInts(t, 100, len(gotFile.f.rows), "rows")
+		assertInts(t, len(gotFile.f.rows[0].positions), 100, "columns")
+		assertInts(t, len(gotFile.f.rows), 100, "rows")
+	})
+}
+
+func TestCalcAdvent16Result(t *testing.T) {
+	t.Run("calc sample example", func(t *testing.T) {
+		gotResult := calcAdvent16Result(readAdvent16File(sampleFilename))
+		got := gotResult.answer
+		want := 5
+		assertInts(t, got, want, "result")
 	})
 }
 
@@ -33,7 +42,7 @@ func assertAdvent16Files(t *testing.T, got advent16File, want advent16File) {
 	}
 }
 
-func assertInts(t *testing.T, want int, got int, clue interface{}) {
+func assertInts(t *testing.T, got int, want int, clue interface{}) {
 	if want != got {
 		t.Fatalf("Got %d %s, want %d", got, clue, want)
 	}
