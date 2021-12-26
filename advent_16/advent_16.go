@@ -106,9 +106,9 @@ type advent16File struct {
 	f field
 }
 type field struct {
-	rows  []fieldRow
-	start point
-	stats fieldStats
+	rows          []fieldRow
+	start, finish point
+	stats         fieldStats
 }
 type fieldStats struct {
 	rowNum, colNum, size, movablePositions int
@@ -158,13 +158,61 @@ func (f *field) isPositionWalkable(position fieldPosition) bool {
 	}
 	return false
 }
+func (f *field) getOrderedPointPermutations(p point) []point {
+	addYBasedOnYDiff := func(yDiff int) []point {
+		if yDiff < 0 {
+			return []point{{p.x, p.y + 1}, {p.x, p.y - 1}}
+		} else {
+			return []point{{p.x, p.y - 1}, {p.x, p.y + 1}}
+		}
+	}
+	addXBasedOnXDiff := func(xDiff int) []point {
+		if xDiff < 0 {
+			return []point{{p.x + 1, p.y}, {p.x - 1, p.y}}
+		} else {
+			return []point{{p.x - 1, p.y}, {p.x + 1, p.y}}
+		}
+	}
+	result := make([]point, 0)
+	//result := []point{{p.x - 1, p.y}, {p.x + 1, p.y}, {p.x, p.y - 1}, {p.x, p.y + 1}}
+	xDiff := p.x - f.finish.x
+	yDiff := p.y - f.finish.y
+	if intAbs(xDiff) > intAbs(yDiff) {
+		if xDiff < 0 {
+			result = append(result, point{p.x + 1, p.y})
+			result = append(result, addYBasedOnYDiff(yDiff)...)
+			result = append(result, point{p.x - 1, p.y})
+		} else {
+			result = append(result, point{p.x - 1, p.y})
+			result = append(result, addYBasedOnYDiff(yDiff)...)
+			result = append(result, point{p.x + 1, p.y})
+
+		}
+	} else {
+		if yDiff < 0 {
+			result = append(result, point{p.x, p.y + 1})
+			result = append(result, addXBasedOnXDiff(xDiff)...)
+			result = append(result, point{p.x, p.y - 1})
+		} else {
+			result = append(result, point{p.x, p.y - 1})
+			result = append(result, addXBasedOnXDiff(xDiff)...)
+			result = append(result, point{p.x, p.y + 1})
+		}
+	}
+	return result
+}
+func intAbs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
 func (f *field) getPossibleMoves(p point, backPoint *point) []point {
 	filter := func(perm point) bool {
 		return (backPoint != nil && perm != *backPoint) || (backPoint == nil)
 	}
 	var result []point
-	permutations := []point{{p.x - 1, p.y}, {p.x + 1, p.y}, {p.x, p.y - 1}, {p.x, p.y + 1}}
-	for _, perm := range permutations {
+	for _, perm := range f.getOrderedPointPermutations(p) {
 		if filter(perm) && f.isWalkable(perm) {
 			result = append(result, perm)
 		}
@@ -199,6 +247,8 @@ func readAdvent16File(filename string) advent16File {
 			switch col {
 			case start:
 				result.start = point{colIdx, rowIdx}
+			case finish:
+				result.finish = point{colIdx, rowIdx}
 			}
 		}
 		result.rows = append(result.rows, row)

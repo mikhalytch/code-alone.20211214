@@ -19,7 +19,7 @@ func TestReadAdvent16File(t *testing.T) {
 			{[]fieldPosition{'#', 'A', '#', '#', '#', '.'}},
 			{[]fieldPosition{'#', '.', '#', 'B', '#', '.'}},
 			{[]fieldPosition{'.', '.', '.', '.', '.', '.'}},
-		}, point{1, 2}, fieldStats{5, 6, 30, 18}}}
+		}, point{1, 2}, point{3, 3}, fieldStats{5, 6, 30, 18}}}
 
 		assertAdvent16Files(t, got, want)
 	})
@@ -27,7 +27,7 @@ func TestReadAdvent16File(t *testing.T) {
 		gotFile := readAdvent16File(realFilename)
 		assertInts(t, len(gotFile.f.rows[0].positions), 100, "columns")
 		assertInts(t, len(gotFile.f.rows), 100, "rows")
-		assertInterfaces(t, gotFile.f.stats, fieldStats{100, 100, 10000, 5117}, "fielStats")
+		assertInterfaces(t, gotFile.f.stats, fieldStats{100, 100, 10000, 5117}, "fieldStats")
 	})
 }
 
@@ -58,7 +58,7 @@ func TestGetPossibleMoves(t *testing.T) {
 			wantMoves []point
 		}{
 			{"at (5,4)", point{5, 4}, []point{{5, 3}}},
-			{"at (3,4)", point{3, 4}, []point{{2, 4}, {3, 3}}},
+			{"at (3,4)", point{3, 4}, []point{{3, 3}, {2, 4}}},
 		}
 		inputField := readAdvent16File(sampleFilename).f
 		for _, test := range tests {
