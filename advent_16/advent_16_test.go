@@ -5,7 +5,10 @@ import (
 	"testing"
 )
 
-const sampleFilename = "advent_16.sample"
+const (
+	sampleFilename = "advent_16.sample"
+	sample2        = "advent_16.2.sample"
+)
 
 func TestReadAdvent16File(t *testing.T) {
 	t.Run("read sample file", func(t *testing.T) {
@@ -28,12 +31,22 @@ func TestReadAdvent16File(t *testing.T) {
 }
 
 func TestCalcAdvent16Result(t *testing.T) {
-	t.Run("calc sample example", func(t *testing.T) {
-		gotResult := calcAdvent16Result(readAdvent16File(sampleFilename))
-		got := gotResult.answer
-		want := 5
-		assertInts(t, got, want, "result")
-	})
+	tests := []struct {
+		name     string
+		filename string
+		want     int
+	}{
+		{"calc sample example", sampleFilename, 5},
+		{"calc sample advent_16.2.sample", sample2, 12},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			gotResult := calcAdvent16Result(readAdvent16File(test.filename))
+			got := gotResult.answer
+			want := test.want
+			assertInts(t, got, want, "result")
+		})
+	}
 }
 
 func TestGetPossibleMoves(t *testing.T) {
