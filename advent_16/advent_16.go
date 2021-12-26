@@ -24,25 +24,45 @@ type advent16Result struct {
 
 func calcAdvent16Result(inputFile advent16File) advent16Result {
 	minPathsAgg := newMinPathsAggregator()
+	xRoadsPathsAgg := make(map[point]minAggregator, 0)
 	initialPath := createPathStart(inputFile.f.start)
-	stepRecursively(&inputFile.f, minPathsAgg, initialPath)
+	stepRecursively(&inputFile.f, minPathsAgg, xRoadsPathsAgg, initialPath)
 
 	log.Println("Path", minPathsAgg.paths[0].asSliceOfPointsReversed())
+	log.Println("branches traversed", total)
 
 	return advent16Result{minPathsAgg.curLen}
 }
 
-func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
-	pathLength := path.length()
-	if pathLength > f.size() {
+type pathCalculationStats struct {
+	finished, tooLongAlready, tooLongAtXRoad, loopDetected, noMoreMoves uint64
+}
+
+func (p pathCalculationStats) total() uint64 {
+	return p.finished + p.tooLongAlready + p.tooLongAtXRoad + p.loopDetected + p.noMoreMoves
+}
+func (p pathCalculationStats) String() string {
+	return fmt.Sprintf(
+		"total:%d {finished:%d, tooLongAlready:%d, tooLongAtXRoad:%d, loopDetected:%d, noMoreMoves:%d}",
+		p.total(), p.finished, p.tooLongAlready, p.tooLongAtXRoad, p.loopDetected, p.noMoreMoves,
+	)
+}
+
+var total = pathCalculationStats{}
+
+func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg map[point]minAggregator, path *path) {
+	currentPathLength := path.length()
+	if currentPathLength > f.stats.movablePositions {
 		log.Fatalln("path is too long, should've looped long ago")
 		//return // too long (however strange this has not looped)
 	}
-	if pathLength > minPathsAgg.curLen {
+	if currentPathLength > minPathsAgg.curLen {
+		total.tooLongAlready++
 		return // already too long
 	}
 	if f.isFinish(path.tail) {
 		minPathsAgg.addPath(*path)
+		total.finished++
 		return
 	}
 	filter := make(map[point]bool, 0)
@@ -50,17 +70,38 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
 		filter[path.nose.tail] = true
 	}
 	moves := f.getPossibleMoves(path.tail, filter)
-	if len(moves) > 1 {
+	if len(moves) > 1 { // cross-road case
 		rowNum := path.tail.y + 1
 		colNum := path.tail.x + 1
-		log.Printf("crossroad at rowNum:%d colNum:%d; moves: %v \n",
-			rowNum, colNum, moves)
+		if _, ok := xRoadsPathAgg[path.tail]; !ok {
+			xRoadsPathAgg[path.tail] = *newMinAggregator()
+		}
+		agg := xRoadsPathAgg[path.tail]
+		if agg.curLen <= currentPathLength { // we've been here already, with shorter path
+			if rowNum > 95 && colNum < 5 {
+				log.Printf("Re-Entered crossroad at rowNum:%d colNum:%d (len: %d; answers:%d[%d]); moves: %v \n",
+					rowNum, colNum, path.len, len(minPathsAgg.paths), minPathsAgg.curLen, moves)
+			}
+			total.tooLongAtXRoad++
+			return
+		} else {
+			if rowNum > 95 && colNum < 5 {
+				log.Printf("crossroad at rowNum:%d colNum:%d (len: %d; answers:%d[%d]); moves: %v \n",
+					rowNum, colNum, path.len, len(minPathsAgg.paths), minPathsAgg.curLen, moves)
+			}
+			agg.addPath(*path)
+		}
+		xRoadsPathAgg[path.tail] = agg
 	}
 	for _, m := range moves {
 		if newPath, ok := path.addPoint(m); ok {
-			stepRecursively(f, minPathsAgg, newPath)
-		} // otherwise - skip, since loop detected
+			stepRecursively(f, minPathsAgg, xRoadsPathAgg, newPath)
+		} else {
+			// otherwise - skip this branch, since loop detected
+			total.loopDetected++
+		}
 	}
+	total.noMoreMoves++ // no moves case
 }
 
 type fieldPosition rune
@@ -78,13 +119,31 @@ type advent16File struct {
 type field struct {
 	rows  []fieldRow
 	start point
+	stats fieldStats
+}
+type fieldStats struct {
+	rowNum, colNum, size, movablePositions int
 }
 type fieldRow struct {
 	positions []fieldPosition // columns
 }
 
-func (f *field) size() int {
-	return len(f.rows[0].positions) * len(f.rows)
+func (f *field) recalculateStats() {
+	positions := 0
+	rows := 0
+	m := 0
+	for rowIdx, row := range f.rows {
+		rows++
+		for _, pos := range row.positions {
+			if rowIdx == 0 {
+				positions++
+			}
+			if f.isPositionWalkable(pos) {
+				m++
+			}
+		}
+	}
+	f.stats = fieldStats{rows, positions, rows * positions, m}
 }
 func (f *field) positionAt(p point) fieldPosition {
 	return f.rows[p.y].positions[p.x]
@@ -95,10 +154,18 @@ func (f *field) isFinish(p point) bool {
 func (f *field) isWalkable(p point) bool {
 	if p.x >= 0 && p.x < len(f.rows[0].positions) {
 		if p.y >= 0 && p.y < len(f.rows) {
-			if f.positionAt(p) != wall {
+			position := f.positionAt(p)
+			if f.isPositionWalkable(position) {
 				return true
 			}
 		}
+	}
+	return false
+}
+
+func (f *field) isPositionWalkable(position fieldPosition) bool {
+	if position != wall {
+		return true
 	}
 	return false
 }
@@ -144,11 +211,25 @@ func readAdvent16File(filename string) advent16File {
 		}
 		result.rows = append(result.rows, row)
 	}
-
+	result.recalculateStats()
 	return advent16File{result}
 }
 
 // aggregator
+func newMinAggregator() *minAggregator {
+	return &minAggregator{curLen: math.MaxInt}
+}
+
+type minAggregator struct {
+	curLen int
+}
+
+func (pa *minAggregator) addPath(p path) {
+	l := p.length()
+	if l < pa.curLen {
+		pa.curLen = l
+	}
+}
 func newMinPathsAggregator() *minPathsAggregator {
 	return &minPathsAggregator{curLen: math.MaxInt}
 }

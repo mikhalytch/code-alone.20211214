@@ -19,7 +19,7 @@ func TestReadAdvent16File(t *testing.T) {
 			{[]fieldPosition{'#', 'A', '#', '#', '#', '.'}},
 			{[]fieldPosition{'#', '.', '#', 'B', '#', '.'}},
 			{[]fieldPosition{'.', '.', '.', '.', '.', '.'}},
-		}, point{1, 2}}}
+		}, point{1, 2}, fieldStats{5, 6, 30, 18}}}
 
 		assertAdvent16Files(t, got, want)
 	})
@@ -27,6 +27,7 @@ func TestReadAdvent16File(t *testing.T) {
 		gotFile := readAdvent16File(realFilename)
 		assertInts(t, len(gotFile.f.rows[0].positions), 100, "columns")
 		assertInts(t, len(gotFile.f.rows), 100, "rows")
+		assertInterfaces(t, gotFile.f.stats, fieldStats{100, 100, 10000, 5117}, "fielStats")
 	})
 }
 
@@ -72,6 +73,11 @@ func TestGetPossibleMoves(t *testing.T) {
 }
 
 func assertSlices(t *testing.T, got []point, want []point, clue interface{}) {
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Got %v %s, want %v", got, clue, want)
+	}
+}
+func assertInterfaces(t *testing.T, got interface{}, want interface{}, clue interface{}) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v %s, want %v", got, clue, want)
 	}
