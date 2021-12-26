@@ -28,7 +28,6 @@ func calcAdvent16Result(inputFile advent16File) advent16Result {
 	initialPath := createPathStart(inputFile.f.start)
 	stepRecursively(&inputFile.f, minPathsAgg, xRoadsPathsAgg, initialPath)
 
-	log.Println("Path", minPathsAgg.paths[0].asSliceOfPointsReversed())
 	log.Println("branches traversed", total)
 
 	return advent16Result{minPathsAgg.curLen}
@@ -65,33 +64,23 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 		total.finished++
 		return
 	}
-	filter := make(map[point]bool, 0)
+	var backPoint *point = nil
 	if path.nose != nil {
-		filter[path.nose.tail] = true
+		backPoint = &path.nose.tail
 	}
-	moves := f.getPossibleMoves(path.tail, filter)
+	moves := f.getPossibleMoves(path.tail, backPoint)
 	if len(moves) > 1 { // cross-road case
-		rowNum := path.tail.y + 1
-		colNum := path.tail.x + 1
-		if _, ok := xRoadsPathAgg[path.tail]; !ok {
-			xRoadsPathAgg[path.tail] = *newMinAggregator()
+		currentXRoadAgg, ok := xRoadsPathAgg[path.tail]
+		if !ok {
+			currentXRoadAgg = *newMinAggregator()
 		}
-		agg := xRoadsPathAgg[path.tail]
-		if agg.curLen <= currentPathLength { // we've been here already, with shorter path
-			if rowNum > 95 && colNum < 5 {
-				log.Printf("Re-Entered crossroad at rowNum:%d colNum:%d (len: %d; answers:%d[%d]); moves: %v \n",
-					rowNum, colNum, path.len, len(minPathsAgg.paths), minPathsAgg.curLen, moves)
-			}
+		if currentXRoadAgg.curLen <= currentPathLength { // we've been here already, with shorter path
 			total.tooLongAtXRoad++
 			return
 		} else {
-			if rowNum > 95 && colNum < 5 {
-				log.Printf("crossroad at rowNum:%d colNum:%d (len: %d; answers:%d[%d]); moves: %v \n",
-					rowNum, colNum, path.len, len(minPathsAgg.paths), minPathsAgg.curLen, moves)
-			}
-			agg.addPath(*path)
+			currentXRoadAgg.addPath(*path)
 		}
-		xRoadsPathAgg[path.tail] = agg
+		xRoadsPathAgg[path.tail] = currentXRoadAgg
 	}
 	for _, m := range moves {
 		if newPath, ok := path.addPoint(m); ok {
@@ -169,11 +158,14 @@ func (f *field) isPositionWalkable(position fieldPosition) bool {
 	}
 	return false
 }
-func (f *field) getPossibleMoves(p point, filter map[point]bool) []point {
+func (f *field) getPossibleMoves(p point, backPoint *point) []point {
+	filter := func(perm point) bool {
+		return (backPoint != nil && perm != *backPoint) || (backPoint == nil)
+	}
 	var result []point
 	permutations := []point{{p.x - 1, p.y}, {p.x + 1, p.y}, {p.x, p.y - 1}, {p.x, p.y + 1}}
 	for _, perm := range permutations {
-		if !filter[perm] && f.isWalkable(perm) {
+		if filter(perm) && f.isWalkable(perm) {
 			result = append(result, perm)
 		}
 	}

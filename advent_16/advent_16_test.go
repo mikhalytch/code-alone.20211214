@@ -57,13 +57,13 @@ func TestGetPossibleMoves(t *testing.T) {
 			atPoint   point
 			wantMoves []point
 		}{
-			{"at (5,4)", point{5, 4}, []point{{4, 4}, {5, 3}}},
-			{"at (3,4)", point{3, 4}, []point{{2, 4}, {4, 4}, {3, 3}}},
+			{"at (5,4)", point{5, 4}, []point{{5, 3}}},
+			{"at (3,4)", point{3, 4}, []point{{2, 4}, {3, 3}}},
 		}
 		inputField := readAdvent16File(sampleFilename).f
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
-				got := inputField.getPossibleMoves(test.atPoint, map[point]bool{})
+				got := inputField.getPossibleMoves(test.atPoint, &point{4, 4})
 				want := test.wantMoves
 				clue := "moves"
 				assertSlices(t, got, want, clue)
