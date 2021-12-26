@@ -28,26 +28,26 @@ func calcAdvent16Result(inputFile advent16File) advent16Result {
 	initialPath := createPathStart(inputFile.f.start)
 	stepRecursively(&inputFile.f, minPathsAgg, xRoadsPathsAgg, initialPath)
 
-	log.Println("branches traversed", total)
+	//log.Println("branches traversed", total)
 
 	return advent16Result{minPathsAgg.curLen}
 }
 
-type pathCalculationStats struct {
-	finished, tooLongAlready, tooLongAtXRoad, loopDetected, eyeletDetected, noMoreMoves uint64
-}
-
-func (p pathCalculationStats) total() uint64 {
-	return p.finished + p.tooLongAlready + p.tooLongAtXRoad + p.loopDetected + p.eyeletDetected + p.noMoreMoves
-}
-func (p pathCalculationStats) String() string {
-	return fmt.Sprintf(
-		"total:%d {finished:%d, tooLongAlready:%d, tooLongAtXRoad:%d, loopDetected:%d, eyeletDetected:%d, noMoreMoves:%d}",
-		p.total(), p.finished, p.tooLongAlready, p.tooLongAtXRoad, p.loopDetected, p.eyeletDetected, p.noMoreMoves,
-	)
-}
-
-var total = pathCalculationStats{}
+//type pathCalculationStats struct {
+//	finished, tooLongAlready, tooLongAtXRoad, loopDetected, eyeletDetected, noMoreMoves uint64
+//}
+//
+//func (p pathCalculationStats) total() uint64 {
+//	return p.finished + p.tooLongAlready + p.tooLongAtXRoad + p.loopDetected + p.eyeletDetected + p.noMoreMoves
+//}
+//func (p pathCalculationStats) String() string {
+//	return fmt.Sprintf(
+//		"total:%d {finished:%d, tooLongAlready:%d, tooLongAtXRoad:%d, loopDetected:%d, eyeletDetected:%d, noMoreMoves:%d}",
+//		p.total(), p.finished, p.tooLongAlready, p.tooLongAtXRoad, p.loopDetected, p.eyeletDetected, p.noMoreMoves,
+//	)
+//}
+//
+//var total = pathCalculationStats{}
 
 func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg map[point]minAggregator, path *path) {
 	currentPathLength := path.length()
@@ -56,12 +56,12 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 		//return // too long (however strange this has not looped)
 	}
 	if currentPathLength > minPathsAgg.curLen {
-		total.tooLongAlready++
+		//total.tooLongAlready++
 		return // already too long
 	}
 	if f.isFinish(path.tail) {
 		minPathsAgg.addPath(*path)
-		total.finished++
+		//total.finished++
 		return
 	}
 	var backPoint *point = nil
@@ -71,7 +71,7 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 	moves := f.getPossibleMoves(path.tail, backPoint)
 	if len(moves) > 1 { // cross-road case
 		if path.hasAnyOfPoints(moves...) {
-			total.eyeletDetected++
+			//total.eyeletDetected++
 			return
 		}
 
@@ -80,7 +80,7 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 			currentXRoadAgg = *newMinAggregator()
 		}
 		if currentXRoadAgg.curLen <= currentPathLength { // we've been here already, with shorter path
-			total.tooLongAtXRoad++
+			//total.tooLongAtXRoad++
 			return
 		} else {
 			currentXRoadAgg.addPath(*path)
@@ -92,10 +92,10 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 			stepRecursively(f, minPathsAgg, xRoadsPathAgg, newPath)
 		} else {
 			// otherwise - skip this branch, since loop detected
-			total.loopDetected++
+			//total.loopDetected++
 		}
 	}
-	total.noMoreMoves++ // no moves case
+	//total.noMoreMoves++ // no moves case
 }
 
 type fieldPosition rune
