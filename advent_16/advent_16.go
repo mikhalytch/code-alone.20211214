@@ -34,16 +34,16 @@ func calcAdvent16Result(inputFile advent16File) advent16Result {
 }
 
 type pathCalculationStats struct {
-	finished, tooLongAlready, tooLongAtXRoad, loopDetected, noMoreMoves uint64
+	finished, tooLongAlready, tooLongAtXRoad, loopDetected, eyeletDetected, noMoreMoves uint64
 }
 
 func (p pathCalculationStats) total() uint64 {
-	return p.finished + p.tooLongAlready + p.tooLongAtXRoad + p.loopDetected + p.noMoreMoves
+	return p.finished + p.tooLongAlready + p.tooLongAtXRoad + p.loopDetected + p.eyeletDetected + p.noMoreMoves
 }
 func (p pathCalculationStats) String() string {
 	return fmt.Sprintf(
-		"total:%d {finished:%d, tooLongAlready:%d, tooLongAtXRoad:%d, loopDetected:%d, noMoreMoves:%d}",
-		p.total(), p.finished, p.tooLongAlready, p.tooLongAtXRoad, p.loopDetected, p.noMoreMoves,
+		"total:%d {finished:%d, tooLongAlready:%d, tooLongAtXRoad:%d, loopDetected:%d, eyeletDetected:%d, noMoreMoves:%d}",
+		p.total(), p.finished, p.tooLongAlready, p.tooLongAtXRoad, p.loopDetected, p.eyeletDetected, p.noMoreMoves,
 	)
 }
 
@@ -70,6 +70,11 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, xRoadsPathAgg ma
 	}
 	moves := f.getPossibleMoves(path.tail, backPoint)
 	if len(moves) > 1 { // cross-road case
+		if path.hasAnyOfPoints(moves...) {
+			total.eyeletDetected++
+			return
+		}
+
 		currentXRoadAgg, ok := xRoadsPathAgg[path.tail]
 		if !ok {
 			currentXRoadAgg = *newMinAggregator()
@@ -310,6 +315,14 @@ func (pp *path) hasThePoint(p *point) bool {
 	}
 	return false
 }
+func (pp *path) hasAnyOfPoints(points ...point) bool {
+	for _, p := range points {
+		if pp.hasThePoint(&p) {
+			return true
+		}
+	}
+	return false
+}
 
 // returns false in case of loop
 func (pp path) addPoint(p point) (*path, bool) {
@@ -330,24 +343,6 @@ func (pp path) asSliceOfPointsReversed() []point {
 	}
 	return result
 }
-
-/*type path struct {
-	points         []point
-	pointsRegistry map[point]bool
-}
-
-// returns false in case of loop
-func (pp *path) addPoint(p point) bool {
-	pp.points = append(pp.points, p)
-	if pp.pointsRegistry[p] {
-		return false
-	}
-	pp.pointsRegistry[p] = true
-	return true
-}
-func (pp path) len() int {
-	return len(pp.points)
-}*/
 
 type point struct {
 	// coordinates; left upper corner is 0,0
