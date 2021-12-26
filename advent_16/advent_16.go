@@ -27,6 +27,8 @@ func calcAdvent16Result(inputFile advent16File) advent16Result {
 	initialPath := createPathStart(inputFile.f.start)
 	stepRecursively(&inputFile.f, minPathsAgg, initialPath)
 
+	log.Println("Path", minPathsAgg.paths[0].asSliceOfPointsReversed())
+
 	return advent16Result{minPathsAgg.curLen}
 }
 
@@ -43,7 +45,17 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
 		minPathsAgg.addPath(*path)
 		return
 	}
-	moves := f.getPossibleMoves(path.tail)
+	filter := make(map[point]bool, 0)
+	if path.nose != nil {
+		filter[path.nose.tail] = true
+	}
+	moves := f.getPossibleMoves(path.tail, filter)
+	if len(moves) > 1 {
+		rowNum := path.tail.y + 1
+		colNum := path.tail.x + 1
+		log.Printf("crossroad at rowNum:%d colNum:%d; moves: %v \n",
+			rowNum, colNum, moves)
+	}
 	for _, m := range moves {
 		if newPath, ok := path.addPoint(m); ok {
 			stepRecursively(f, minPathsAgg, newPath)
@@ -90,11 +102,11 @@ func (f *field) isWalkable(p point) bool {
 	}
 	return false
 }
-func (f *field) getPossibleMoves(p point) []point {
+func (f *field) getPossibleMoves(p point, filter map[point]bool) []point {
 	var result []point
 	permutations := []point{{p.x - 1, p.y}, {p.x + 1, p.y}, {p.x, p.y - 1}, {p.x, p.y + 1}}
 	for _, perm := range permutations {
-		if f.isWalkable(perm) {
+		if !filter[perm] && f.isWalkable(perm) {
 			result = append(result, perm)
 		}
 	}
@@ -185,6 +197,14 @@ func (pp path) addPoint(p point) (*path, bool) {
 // minus starting node
 func (pp path) length() int {
 	return pp.len
+}
+
+func (pp path) asSliceOfPointsReversed() []point {
+	var result []point
+	for current := &pp; current != nil; current = current.nose {
+		result = append(result, current.tail)
+	}
+	return result
 }
 
 /*type path struct {

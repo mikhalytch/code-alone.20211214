@@ -49,7 +49,7 @@ func TestGetPossibleMoves(t *testing.T) {
 		inputField := readAdvent16File(sampleFilename).f
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
-				got := inputField.getPossibleMoves(test.atPoint)
+				got := inputField.getPossibleMoves(test.atPoint, map[point]bool{})
 				want := test.wantMoves
 				clue := "moves"
 				assertSlices(t, got, want, clue)
