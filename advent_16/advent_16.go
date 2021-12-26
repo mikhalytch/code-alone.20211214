@@ -31,8 +31,13 @@ func calcAdvent16Result(inputFile advent16File) advent16Result {
 }
 
 func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
-	if path.length() > f.size() {
-		return // too long (however strange this has not looped)
+	pathLength := path.length()
+	if pathLength > f.size() {
+		log.Fatalln("path is too long, should've looped long ago")
+		//return // too long (however strange this has not looped)
+	}
+	if pathLength > minPathsAgg.curLen {
+		return // already too long
 	}
 	if f.isFinish(path.tail) {
 		minPathsAgg.addPath(*path)
@@ -40,21 +45,19 @@ func stepRecursively(f *field, minPathsAgg *minPathsAggregator, path *path) {
 	}
 	moves := f.getPossibleMoves(path.tail)
 	for _, m := range moves {
-		if newPath, ok := path.addPoint(m); !ok {
-			return // loop
-		} else {
+		if newPath, ok := path.addPoint(m); ok {
 			stepRecursively(f, minPathsAgg, newPath)
-		}
+		} // otherwise - skip, since loop detected
 	}
 }
 
 type fieldPosition rune
 
 const (
-	road   fieldPosition = '.'
-	wall   fieldPosition = '#'
-	start  fieldPosition = 'A'
-	finish fieldPosition = 'B'
+	_/*road*/ fieldPosition = '.'
+	wall                    fieldPosition = '#'
+	start                   fieldPosition = 'A'
+	finish                  fieldPosition = 'B'
 )
 
 type advent16File struct {
@@ -80,12 +83,7 @@ func (f *field) isFinish(p point) bool {
 func (f *field) isWalkable(p point) bool {
 	if p.x >= 0 && p.x < len(f.rows[0].positions) {
 		if p.y >= 0 && p.y < len(f.rows) {
-			switch f.positionAt(p) {
-			case wall:
-				return false
-			case finish:
-			case start:
-			case road:
+			if f.positionAt(p) != wall {
 				return true
 			}
 		}
@@ -94,10 +92,10 @@ func (f *field) isWalkable(p point) bool {
 }
 func (f *field) getPossibleMoves(p point) []point {
 	var result []point
-	permutations := []point{{p.x + 1, p.y}, {p.x - 1, p.y}, {p.x, p.y + 1}, {p.x, p.y - 1}}
-	for _, p := range permutations {
-		if f.isWalkable(p) {
-			result = append(result, p)
+	permutations := []point{{p.x - 1, p.y}, {p.x + 1, p.y}, {p.x, p.y - 1}, {p.x, p.y + 1}}
+	for _, perm := range permutations {
+		if f.isWalkable(perm) {
+			result = append(result, perm)
 		}
 	}
 	return result
@@ -171,16 +169,17 @@ type path struct {
 
 func (pp path) pointsRegistry() map[point]bool {
 	result := make(map[point]bool, pp.len)
-	c := &pp
-	for ; c != nil; c = pp.nose {
-		result[c.tail] = true
+	for current := &pp; current != nil; current = current.nose {
+		result[current.tail] = true
 	}
 	return result
 }
 
 // returns false in case of loop
 func (pp path) addPoint(p point) (*path, bool) {
-	return &path{&pp, p, pp.len + 1}, !pp.pointsRegistry()[p]
+	newPath := path{&pp, p, pp.len + 1}
+	loopIdentified := pp.pointsRegistry()[p]
+	return &newPath, !loopIdentified
 }
 
 // minus starting node

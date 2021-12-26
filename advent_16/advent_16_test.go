@@ -36,6 +36,34 @@ func TestCalcAdvent16Result(t *testing.T) {
 	})
 }
 
+func TestGetPossibleMoves(t *testing.T) {
+	t.Run("sample field possible moves", func(t *testing.T) {
+		tests := []struct {
+			name      string
+			atPoint   point
+			wantMoves []point
+		}{
+			{"at (5,4)", point{5, 4}, []point{{4, 4}, {5, 3}}},
+			{"at (3,4)", point{3, 4}, []point{{2, 4}, {4, 4}, {3, 3}}},
+		}
+		inputField := readAdvent16File(sampleFilename).f
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				got := inputField.getPossibleMoves(test.atPoint)
+				want := test.wantMoves
+				clue := "moves"
+				assertSlices(t, got, want, clue)
+			})
+		}
+	})
+}
+
+func assertSlices(t *testing.T, got []point, want []point, clue interface{}) {
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("Got %v %s, want %v", got, clue, want)
+	}
+}
+
 func assertAdvent16Files(t *testing.T, got advent16File, want advent16File) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
