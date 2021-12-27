@@ -1,6 +1,12 @@
 package main
 
-import "log"
+import (
+	"bytes"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+)
 
 const realFilename = "advent_17.test.txt"
 
@@ -23,5 +29,9 @@ type advent17File struct {
 }
 
 func readAdvent17File(filename string) advent17File {
-	return advent17File{}
+	str, err := os.ReadFile(filename)
+	if err != nil {
+		log.Println(fmt.Errorf("error opening file %q: %w", filename, err))
+	}
+	return advent17File{bytes.Runes([]byte(strings.TrimSpace(string(str))))}
 }
