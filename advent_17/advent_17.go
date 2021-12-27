@@ -71,6 +71,7 @@ func (p paren) isComplemetary(o paren) (bool, error) {
 type parenStack interface {
 	add(p paren, calc *zeroLevelBracesCalculator) parenStack
 	level() int
+	runesTo(buf *[]rune)
 }
 
 func createEmptyParenStack() parenStack {
@@ -81,6 +82,10 @@ type emptyParenStack struct{}
 
 func (e *emptyParenStack) level() int {
 	return 0
+}
+
+func (e *emptyParenStack) runesTo(_ *[]rune) {
+	// nop
 }
 
 func (e *emptyParenStack) add(p paren, calc *zeroLevelBracesCalculator) parenStack {
@@ -122,16 +127,13 @@ func (ps *realParenStack) level() int {
 	return ps.l
 }
 
-func runesRecursively(ps parenStack) []rune {
-	switch tps := ps.(type) {
-	case *realParenStack:
-		return append(runesRecursively(tps.prev), rune(tps.p))
-	default:
-		return []rune{}
-	}
+func (ps *realParenStack) runesTo(buf *[]rune) {
+	ps.prev.runesTo(buf) // recurse
+	*buf = append(*buf, rune(ps.p))
 }
 func (ps *realParenStack) String() string {
-	runes := runesRecursively(ps)
+	var runes []rune
+	ps.runesTo(&runes)
 	return fmt.Sprintf("%q", string(runes))
 }
 

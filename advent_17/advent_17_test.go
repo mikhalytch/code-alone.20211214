@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 const sampleFilename = "advent_17.sample"
 
@@ -47,6 +50,26 @@ func TestReadAdvent17File(t *testing.T) {
 			got := readAdvent17File(test.filename)
 			assertInts(t, len(got.symbols), test.wantLength, "length")
 		})
+	}
+}
+
+func TestAppendRunes(t *testing.T) {
+	parens := []paren{'(', '{', '}', '[', '{', '{'}
+	stack := createEmptyParenStack()
+	calc := &zeroLevelBracesCalculator{}
+	for _, p := range parens {
+		stack = stack.add(p, calc)
+	}
+	got := fmt.Sprint(stack)
+	want := "\"([{{\""
+	clue := interface{}("stack")
+
+	assertStrings(t, got, want, clue)
+}
+
+func assertStrings(t *testing.T, got string, want string, clue interface{}) {
+	if got != want {
+		t.Fatalf("Got %q %s, want %q", got, clue, want)
 	}
 }
 
