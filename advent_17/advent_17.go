@@ -19,6 +19,7 @@ func calcAdvent17Result(inputFile advent17File) advent17Result {
 }
 
 type advent17File struct {
+	symbols []rune
 }
 
 func readAdvent17File(filename string) advent17File {

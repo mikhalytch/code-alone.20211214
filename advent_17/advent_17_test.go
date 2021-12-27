@@ -30,6 +30,23 @@ func TestCalcAdvent17Result(t *testing.T) {
 	})
 }
 
+func TestReadAdvent17File(t *testing.T) {
+	tests := []struct {
+		name       string
+		filename   string
+		wantLength int
+	}{
+		{"sample", sampleFilename, 16},
+		{"real file", realFilename, 100000},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := readAdvent17File(test.filename)
+			assertInts(t, len(got.symbols), test.wantLength, "length")
+		})
+	}
+}
+
 func assertInts(t *testing.T, got int, want int, clue interface{}) {
 	if got != want {
 		t.Fatalf("Got %d %s, want %d", got, clue, want)
