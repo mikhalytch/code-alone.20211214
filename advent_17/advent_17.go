@@ -48,7 +48,8 @@ func unmatchedClosingParenError(p paren) error {
 
 // returns error in case of unmatched closing paren
 func (p paren) isClosing() bool {
-	if p == '(' || p == '[' || p == '{' {
+	switch p {
+	case '(', '[', '{':
 		return false
 	}
 	return true
