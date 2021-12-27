@@ -5,7 +5,7 @@ import "testing"
 const sampleFilename = "advent_17.sample"
 
 func TestCalcAdvent17Result(t *testing.T) {
-	t.Run("samples", func(t *testing.T) {
+	t.Run("files", func(t *testing.T) {
 		tests := []struct {
 			name     string
 			filename string
@@ -14,6 +14,9 @@ func TestCalcAdvent17Result(t *testing.T) {
 			{"sample", sampleFilename, 2},
 			{"sample.1", "advent_17.1.sample", 1},
 			{"sample.2", "advent_17.2.sample", 0},
+			{"sample.2", "advent_17.3.sample", 0},
+			{"sample.2", "advent_17.4.sample", 0},
+			{"sample.2", realFilename, 1},
 		}
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
