@@ -122,11 +122,13 @@ func TestCreateCodeVariants(t *testing.T) {
 }
 
 func assertSlices(t *testing.T, got []string, want []string) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %v, want %v", got, want)
 	}
 }
 func assertSortedSlices(t *testing.T, got []string, want []string) {
+	t.Helper()
 	sort.Strings(got)
 	sort.Strings(want)
 	assertSlices(t, got, want)
@@ -152,6 +154,7 @@ func TestLexicographicallyMinimalString(t *testing.T) {
 }
 
 func assertStrings(t *testing.T, got string, want string) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %s, want %s", got, want)
 	}

@@ -64,30 +64,35 @@ func TestReadAdvent11File(t *testing.T) {
 }
 
 func assertInt64s(t *testing.T, got int64, want int64) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 
 func assertResults(t *testing.T, got advent11Result, want advent11Result) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 
 func assertFileLines(t *testing.T, got advent11FileLine, want advent11FileLine) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v line, want %v", got, want)
 	}
 }
 
 func assertNumbers(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
 }
 
 func assertAdvent11Files(t *testing.T, got advent11File, want advent11File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}

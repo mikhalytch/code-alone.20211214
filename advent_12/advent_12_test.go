@@ -21,12 +21,14 @@ func TestCalcAdvent12Result(t *testing.T) {
 }
 
 func assertAdvent12Results(t *testing.T, got advent12Result, want advent12Result) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 
 func assertInt64(t *testing.T, got int64, want int64) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
@@ -55,6 +57,7 @@ func TestIsFit(t *testing.T) {
 }
 
 func assertBool(t *testing.T, want bool, got bool) {
+	t.Helper()
 	if want != got {
 		t.Fatalf("Got %v, want %v", got, want)
 	}

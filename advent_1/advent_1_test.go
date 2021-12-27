@@ -12,6 +12,7 @@ func TestCalcAdvent1(t *testing.T) {
 }
 
 func assertCalcAdvent1Results(t *testing.T, got advent1Result, want advent1Result) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}

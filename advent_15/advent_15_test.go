@@ -78,22 +78,26 @@ func TestDistanceTo(t *testing.T) {
 }
 
 func assertInts(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
 }
 func assertUints(t *testing.T, got uint64, want uint64) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
 }
 
 func assertAdvent15Files(t *testing.T, got advent15File, want advent15File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 func assertPoints(t *testing.T, got point, want point) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}

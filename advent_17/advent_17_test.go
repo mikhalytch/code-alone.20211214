@@ -68,12 +68,14 @@ func TestAppendRunes(t *testing.T) {
 }
 
 func assertStrings(t *testing.T, got string, want string, clue interface{}) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %q %s, want %q", got, clue, want)
 	}
 }
 
 func assertInts(t *testing.T, got int, want int, clue interface{}) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d %s, want %d", got, clue, want)
 	}

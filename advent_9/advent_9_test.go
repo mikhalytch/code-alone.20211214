@@ -40,12 +40,14 @@ func TestCalcAdvent9Result(t *testing.T) {
 }
 
 func assertIntegers(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %d, want %d", got, want)
 	}
 }
 
 func assertAdvent9Files(t *testing.T, got advent9File, want advent9File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %v, want %v", got, want)
 	}

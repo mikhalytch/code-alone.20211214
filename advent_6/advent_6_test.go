@@ -53,12 +53,14 @@ func TestGetAggregatedDirections(t *testing.T) {
 }
 
 func assertStrings(t *testing.T, got string, want string) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %s, want %s", got, want)
 	}
 }
 
 func assertRuneArray(t *testing.T, want []rune, got []rune) {
+	t.Helper()
 	if !reflect.DeepEqual(want, got) {
 		t.Errorf("Got %v, want %v", got, want)
 	}

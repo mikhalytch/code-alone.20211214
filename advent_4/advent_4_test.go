@@ -35,6 +35,7 @@ func TestCalcAdvent4Result(t *testing.T) {
 }
 
 func assertNumbers(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %v lenghts, want %v", got, want)
 	}

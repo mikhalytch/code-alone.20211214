@@ -113,30 +113,35 @@ func TestCreateLimitedSet(t *testing.T) {
 }
 
 func assertRuneSlices(t *testing.T, got []rune, want []rune) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 
 func assertRunes(t *testing.T, got rune, want rune) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %s, want %s", string(got), string(want))
 	}
 }
 
 func assertStrings(t *testing.T, got string, want string) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %q, want %q", got, want)
 	}
 }
 
 func assertInts(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
 }
 
 func assertAdvent14Files(t *testing.T, got advent14File, want advent14File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}

@@ -12,6 +12,7 @@ func TestReadAdvent2File(t *testing.T) {
 }
 
 func assertAdvent2Files(t *testing.T, got advent2File, want advent2File) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %v, want %v", got, want)
 	}
@@ -25,6 +26,7 @@ func TestCalcAdvent2(t *testing.T) {
 }
 
 func assertAdvent2Results(t *testing.T, got advent2Result, want advent2Result) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %q, want %q", got, want)
 	}

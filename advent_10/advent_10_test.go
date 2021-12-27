@@ -32,12 +32,14 @@ func TestCalcAdvent10Result(t *testing.T) {
 }
 
 func assertAdvent10Results(t *testing.T, got advent10Result, want advent10Result) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %v, want %v", got, want)
 	}
 }
 
 func assertNumbers(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Errorf("Got %v, want %v", got, want)
 	}
@@ -75,6 +77,7 @@ func TestReadAdvent10File(t *testing.T) {
 }
 
 func assertAdvent10Files(t *testing.T, got advent10File, want advent10File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Got %v, want %v", got, want)
 	}

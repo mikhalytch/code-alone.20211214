@@ -30,18 +30,21 @@ func TestCalcAdvent13Result(t *testing.T) {
 }
 
 func assertStrings(t *testing.T, got string, want string) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %s, want %s", got, want)
 	}
 }
 
 func assertInts(t *testing.T, got int, want int) {
+	t.Helper()
 	if got != want {
 		t.Fatalf("Got %d, want %d", got, want)
 	}
 }
 
 func assertAdvent13Files(t *testing.T, got advent13File, want advent13File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}

@@ -73,23 +73,27 @@ func TestGetPossibleMoves(t *testing.T) {
 }
 
 func assertSlices(t *testing.T, got []point, want []point, clue interface{}) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v %s, want %v", got, clue, want)
 	}
 }
 func assertInterfaces(t *testing.T, got interface{}, want interface{}, clue interface{}) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v %s, want %v", got, clue, want)
 	}
 }
 
 func assertAdvent16Files(t *testing.T, got advent16File, want advent16File) {
+	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("Got %v, want %v", got, want)
 	}
 }
 
 func assertInts(t *testing.T, got int, want int, clue interface{}) {
+	t.Helper()
 	if want != got {
 		t.Fatalf("Got %d %s, want %d", got, clue, want)
 	}
