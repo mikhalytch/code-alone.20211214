@@ -23,6 +23,11 @@ func TestCalcAdvent17Result(t *testing.T) {
 			})
 		}
 	})
+	t.Run("real file calculation (based on IDE analysis)", func(t *testing.T) {
+		got := calcAdvent17Result(readAdvent17File(realFilename))
+		want := 1
+		assertInts(t, got.answer, want, "answer")
+	})
 }
 
 func assertInts(t *testing.T, got int, want int, clue interface{}) {
